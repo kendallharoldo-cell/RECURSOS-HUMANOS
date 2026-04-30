@@ -63,6 +63,16 @@
   .notif-btn:hover{background:var(--bg4);}
   .notif-btn svg{width:15px;height:15px;color:var(--text2);}
   .notif-dot{width:7px;height:7px;background:var(--red);border-radius:50%;position:absolute;top:7px;right:7px;border:1.5px solid var(--bg2);}
+
+  /* ── BOTÓN DE PRIVACIDAD ── */
+  #privacy-btn{width:34px;height:34px;border-radius:8px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;transition:all 0.2s;background:var(--bg3);}
+  #privacy-btn:hover{background:var(--bg4);}
+  #privacy-btn.locked{background:rgba(251,191,36,0.15);border-color:rgba(251,191,36,0.4);}
+  #privacy-btn.locked svg{color:var(--amber);}
+  #privacy-btn svg{width:15px;height:15px;color:var(--text2);transition:color 0.2s;}
+  #privacy-label{font-size:10px;font-family:var(--mono);padding:3px 8px;border-radius:6px;transition:all 0.2s;display:none;}
+  #privacy-label.locked{background:rgba(251,191,36,0.15);color:var(--amber);border:1px solid rgba(251,191,36,0.35);display:flex;align-items:center;gap:4px;}
+
   #fb-status{display:flex;align-items:center;gap:6px;font-size:11px;font-family:var(--mono);padding:4px 10px;border-radius:6px;}
   #fb-status.connected{background:rgba(52,211,153,0.12);color:var(--green);}
   #fb-status.connecting{background:rgba(251,191,36,0.12);color:var(--amber);}
@@ -178,7 +188,6 @@
   .confirm-box .confirm-icon{font-size:40px;margin-bottom:12px;}
   .confirm-box h3{font-size:17px;font-weight:600;margin-bottom:8px;}
   .confirm-box p{font-size:13px;color:var(--text2);line-height:1.5;}
-  /* ORG CHART */
   .org-canvas{overflow:auto;padding:24px 32px 40px;min-height:420px;position:relative;background:var(--bg);border-radius:12px;}
   .org-node-col{display:flex;flex-direction:column;align-items:center;}
   .org-node{background:var(--bg3);border:1.5px solid var(--border2);border-radius:12px;padding:12px 14px 10px;display:flex;flex-direction:column;align-items:center;width:140px;cursor:pointer;transition:all 0.15s;position:relative;z-index:2;box-shadow:0 2px 8px rgba(0,0,0,0.18);}
@@ -201,7 +210,6 @@
   .org-add-child-btn{margin-top:6px;width:26px;height:26px;border-radius:50%;background:transparent;border:1.5px dashed var(--border2);color:var(--text3);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;}
   .org-add-child-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(91,141,239,0.08);}
   .org-empty{text-align:center;padding:60px 20px;color:var(--text3);font-size:13px;}
-  /* KPI METRIC CARD */
   .kpi-metric{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;display:flex;flex-direction:column;gap:4px;}
   .kpi-metric-label{font-size:11px;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:0.4px;}
   .kpi-metric-value{font-size:22px;font-weight:600;letter-spacing:-0.5px;}
@@ -210,6 +218,8 @@
   .tab-bar{display:flex;gap:4px;margin-bottom:16px;background:var(--bg3);padding:4px;border-radius:10px;width:fit-content;}
   .tab{padding:6px 16px;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;color:var(--text3);transition:all 0.15s;}
   .tab.active{background:var(--bg2);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,0.3);}
+  /* Clase para enmascarar datos confidenciales */
+  .salary-mask{filter:blur(5px);user-select:none;transition:filter 0.2s;pointer-events:none;}
   @media(max-width:900px){.grid4{grid-template-columns:repeat(2,1fr)}.grid3{grid-template-columns:1fr 1fr}}
   @media(max-width:680px){#sidebar{display:none}.grid2,.grid3,.grid4{grid-template-columns:1fr}}
 </style>
@@ -313,7 +323,11 @@
         <div style="background:var(--bg3);border-radius:10px;padding:14px;"><div style="font-size:11px;color:var(--text3);margin-bottom:4px;">TELÉFONO</div><div style="font-size:13px;" id="view-emp-phone"></div></div>
         <div style="background:var(--bg3);border-radius:10px;padding:14px;"><div style="font-size:11px;color:var(--text3);margin-bottom:4px;">DEPARTAMENTO</div><div style="font-size:13px;" id="view-emp-dept2"></div></div>
         <div style="background:var(--bg3);border-radius:10px;padding:14px;"><div style="font-size:11px;color:var(--text3);margin-bottom:4px;">CONTRATO</div><div style="font-size:13px;" id="view-emp-contract"></div></div>
-        <div style="background:var(--bg3);border-radius:10px;padding:14px;"><div style="font-size:11px;color:var(--text3);margin-bottom:4px;">SALARIO BRUTO</div><div style="font-size:16px;font-weight:600;color:var(--green);font-family:var(--mono);" id="view-emp-salary"></div></div>
+        <div style="background:var(--bg3);border-radius:10px;padding:14px;" id="view-salary-card">
+          <div style="font-size:11px;color:var(--text3);margin-bottom:4px;">SALARIO BRUTO</div>
+          <div style="font-size:16px;font-weight:600;color:var(--green);font-family:var(--mono);" id="view-emp-salary"></div>
+          <div style="font-size:10px;color:var(--text3);margin-top:4px;" id="view-salary-lock-hint" style="display:none;"></div>
+        </div>
         <div style="background:var(--bg3);border-radius:10px;padding:14px;"><div style="font-size:11px;color:var(--text3);margin-bottom:4px;">FECHA INGRESO</div><div style="font-size:13px;font-family:var(--mono);" id="view-emp-joindate"></div></div>
       </div>
     </div>
@@ -567,7 +581,7 @@
   <div class="sidebar-section">
     <div class="sidebar-label">Gestión</div>
     <div class="nav-item" onclick="nav('reclutamiento',this)"><svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="6" r="3" stroke="currentColor" stroke-width="1.3"/><path d="M2 14c0-3.31 2.69-6 6-6s6 2.69 6 6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>Reclutamiento<span class="nav-badge" id="badge-rec">0</span></div>
-    <div class="nav-item" onclick="nav('nominas',this)"><svg viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M8 6v4M6 8h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>Nóminas</div>
+    <div class="nav-item" id="nav-nominas" onclick="nav('nominas',this)"><svg viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M8 6v4M6 8h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>Nóminas</div>
     <div class="nav-item" onclick="nav('vacaciones',this)"><svg viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="11" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M5 2v2M11 2v2M2 7h12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>Vacaciones<span class="nav-badge" id="badge-vac">0</span></div>
   </div>
   <div class="sidebar-section">
@@ -597,6 +611,12 @@
       <div class="search-box">
         <svg viewBox="0 0 16 16" fill="none"><circle cx="6.5" cy="6.5" r="4" stroke="currentColor" stroke-width="1.3"/><path d="M10 10l3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
         <input type="text" id="global-search" placeholder="Buscar empleado..." oninput="globalSearch(this.value)">
+      </div>
+      <!-- BOTÓN DE PRIVACIDAD / OCULTAR SALARIOS -->
+      <div id="privacy-label"></div>
+      <div id="privacy-btn" onclick="togglePrivacy()" title="Ocultar/mostrar datos de nómina y salarios">
+        <svg id="privacy-icon-lock" viewBox="0 0 16 16" fill="none" style="display:none;"><path d="M11 7V5a3 3 0 0 0-6 0v2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><rect x="3" y="7" width="10" height="7" rx="1.5" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="11" r="1" fill="currentColor"/></svg>
+        <svg id="privacy-icon-unlock" viewBox="0 0 16 16" fill="none"><path d="M11 7V5a3 3 0 0 0-6 0v2M11 4a3 3 0 0 1 3 3v0" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><rect x="3" y="7" width="10" height="7" rx="1.5" stroke="currentColor" stroke-width="1.3"/></svg>
       </div>
       <div class="notif-btn"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M8 2a5 5 0 0 1 5 5v2l1 2H2l1-2V7a5 5 0 0 1 5-5z"/><path d="M6.5 13a1.5 1.5 0 0 0 3 0" stroke-linecap="round"/></svg><div class="notif-dot"></div></div>
       <button class="btn btn-primary" onclick="headerAction()">
@@ -656,7 +676,7 @@
           </div>
         </div>
         <div class="table-wrap">
-          <table><thead><tr><th>Empleado</th><th>Departamento</th><th>Puesto</th><th>Contrato</th><th>Salario</th><th>Estado</th><th></th></tr></thead>
+          <table><thead><tr><th>Empleado</th><th>Departamento</th><th>Puesto</th><th>Contrato</th><th id="th-salary">Salario</th><th>Estado</th><th></th></tr></thead>
           <tbody id="employees-tbody"></tbody></table>
         </div>
       </div>
@@ -716,15 +736,23 @@
 
     <!-- NOMINAS -->
     <div class="page" id="page-nominas">
-      <div class="grid4" style="margin-bottom:20px;">
-        <div class="stat-card"><div class="stat-accent-bar" style="background:var(--green)"></div><div class="stat-label">Masa salarial mensual</div><div class="stat-value" id="nom-total" style="color:var(--green)">Q0</div></div>
-        <div class="stat-card"><div class="stat-accent-bar" style="background:var(--accent)"></div><div class="stat-label">Salario promedio</div><div class="stat-value" id="nom-avg" style="color:var(--accent)">Q0</div></div>
-        <div class="stat-card"><div class="stat-accent-bar" style="background:var(--amber)"></div><div class="stat-label">Empleados</div><div class="stat-value" id="nom-count" style="color:var(--amber)">0</div></div>
-        <div class="stat-card"><div class="stat-accent-bar" style="background:var(--purple)"></div><div class="stat-label">Próximo pago</div><div class="stat-value" style="color:var(--purple);font-size:16px;" id="nom-next">—</div></div>
+      <!-- Banner de privacidad activa -->
+      <div id="nominas-privacy-banner" style="display:none;margin-bottom:16px;padding:14px 18px;background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.3);border-radius:12px;display:none;align-items:center;gap:12px;">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;color:var(--amber);"><path d="M11 7V5a3 3 0 0 0-6 0v2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><rect x="3" y="7" width="10" height="7" rx="1.5" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="11" r="1" fill="currentColor"/></svg>
+        <span style="font-size:13px;color:var(--amber);font-weight:500;">Modo privacidad activo — los datos de nómina están ocultos</span>
+        <button onclick="togglePrivacy()" style="margin-left:auto;background:rgba(251,191,36,0.2);border:1px solid rgba(251,191,36,0.4);color:var(--amber);padding:4px 12px;border-radius:6px;cursor:pointer;font-size:12px;font-family:var(--font);">Mostrar datos</button>
       </div>
-      <div class="grid2">
-        <div class="card"><div class="card-title">Top 10 salarios</div><div class="table-wrap"><table><thead><tr><th>Empleado</th><th>Dept.</th><th>Salario</th></tr></thead><tbody id="salary-tbody"></tbody></table></div></div>
-        <div class="card"><div class="card-title">Distribución por rango</div><div id="salary-dist"></div></div>
+      <div id="nominas-content">
+        <div class="grid4" style="margin-bottom:20px;">
+          <div class="stat-card"><div class="stat-accent-bar" style="background:var(--green)"></div><div class="stat-label">Masa salarial mensual</div><div class="stat-value" id="nom-total" style="color:var(--green)">Q0</div></div>
+          <div class="stat-card"><div class="stat-accent-bar" style="background:var(--accent)"></div><div class="stat-label">Salario promedio</div><div class="stat-value" id="nom-avg" style="color:var(--accent)">Q0</div></div>
+          <div class="stat-card"><div class="stat-accent-bar" style="background:var(--amber)"></div><div class="stat-label">Empleados</div><div class="stat-value" id="nom-count" style="color:var(--amber)">0</div></div>
+          <div class="stat-card"><div class="stat-accent-bar" style="background:var(--purple)"></div><div class="stat-label">Próximo pago</div><div class="stat-value" style="color:var(--purple);font-size:16px;" id="nom-next">—</div></div>
+        </div>
+        <div class="grid2">
+          <div class="card"><div class="card-title">Top 10 salarios</div><div class="table-wrap"><table><thead><tr><th>Empleado</th><th>Dept.</th><th>Salario</th></tr></thead><tbody id="salary-tbody"></tbody></table></div></div>
+          <div class="card"><div class="card-title">Distribución por rango</div><div id="salary-dist"></div></div>
+        </div>
       </div>
     </div>
 
@@ -739,61 +767,37 @@
       <div class="card"><div class="card-title">Solicitudes de ausencia</div><div class="table-wrap"><table><thead><tr><th>Empleado</th><th>Tipo</th><th>Desde</th><th>Hasta</th><th>Días</th><th>Motivo</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="vacations-tbody"></tbody></table></div></div>
     </div>
 
-    <!-- ═══════════════ KPIs Y ANALÍTICA — 100% DINÁMICO ═══════════════ -->
+    <!-- KPIs -->
     <div class="page" id="page-kpis">
-      <!-- Métricas principales calculadas desde tus datos -->
       <div class="grid4" style="margin-bottom:20px;">
         <div class="stat-card"><div class="stat-accent-bar" style="background:var(--accent)"></div><div class="stat-label">Total empleados</div><div class="stat-value" id="kpi-total" style="color:var(--accent)">0</div><div class="stat-delta delta-up" id="kpi-total-sub">—</div></div>
         <div class="stat-card"><div class="stat-accent-bar" style="background:var(--green)"></div><div class="stat-label">Tasa de actividad</div><div class="stat-value" id="kpi-actividad" style="color:var(--green)">0%</div><div class="stat-delta" style="color:var(--text3)" id="kpi-actividad-sub">—</div></div>
-        <div class="stat-card"><div class="stat-accent-bar" style="background:var(--amber)"></div><div class="stat-label">Masa salarial</div><div class="stat-value" id="kpi-masa" style="color:var(--amber);font-size:18px;">Q0</div><div class="stat-delta" style="color:var(--text3)" id="kpi-masa-sub">—</div></div>
+        <div class="stat-card" id="kpi-masa-card"><div class="stat-accent-bar" style="background:var(--amber)"></div><div class="stat-label">Masa salarial</div><div class="stat-value" id="kpi-masa" style="color:var(--amber);font-size:18px;">Q0</div><div class="stat-delta" style="color:var(--text3)" id="kpi-masa-sub">—</div></div>
         <div class="stat-card"><div class="stat-accent-bar" style="background:var(--purple)"></div><div class="stat-label">Score evaluaciones</div><div class="stat-value" id="kpi-score" style="color:var(--purple)">—</div><div class="stat-delta" style="color:var(--text3)" id="kpi-score-sub">promedio</div></div>
       </div>
-
       <div class="grid2" style="margin-bottom:20px;">
-        <!-- Departamentos dinámicos -->
         <div class="card">
           <div class="card-title">Empleados por departamento</div>
           <div id="kpi-dept-bars"><div class="empty-state" style="padding:20px;"><p>Agrega empleados para ver la distribución</p></div></div>
         </div>
-        <!-- Contrataciones y salario dinámico -->
-        <div class="card">
+        <div class="card" id="kpi-salary-dept-card">
           <div class="card-title">Distribución salarial por departamento</div>
           <div id="kpi-salary-dept"><div class="empty-state" style="padding:20px;"><p>Agrega empleados con salario para ver este análisis</p></div></div>
         </div>
       </div>
-
       <div class="grid3" style="margin-bottom:20px;">
-        <!-- Estados de empleados -->
-        <div class="card">
-          <div class="card-title">Estado de la plantilla</div>
-          <div id="kpi-status-breakdown"></div>
-        </div>
-        <!-- Reclutamiento -->
-        <div class="card">
-          <div class="card-title">Embudo de reclutamiento</div>
-          <div id="kpi-recruitment-funnel"></div>
-        </div>
-        <!-- Vacaciones / ausencias -->
-        <div class="card">
-          <div class="card-title">Solicitudes de ausencia</div>
-          <div id="kpi-vacation-status"></div>
-        </div>
+        <div class="card"><div class="card-title">Estado de la plantilla</div><div id="kpi-status-breakdown"></div></div>
+        <div class="card"><div class="card-title">Embudo de reclutamiento</div><div id="kpi-recruitment-funnel"></div></div>
+        <div class="card"><div class="card-title">Solicitudes de ausencia</div><div id="kpi-vacation-status"></div></div>
       </div>
-
       <div class="grid2">
-        <!-- Top empleados por salario -->
-        <div class="card">
+        <div class="card" id="kpi-top-salaries-card">
           <div class="card-title">Top 5 salarios más altos</div>
           <div id="kpi-top-salaries"></div>
         </div>
-        <!-- Evaluaciones por departamento -->
-        <div class="card">
-          <div class="card-title">Evaluaciones de desempeño</div>
-          <div id="kpi-evals-summary"></div>
-        </div>
+        <div class="card"><div class="card-title">Evaluaciones de desempeño</div><div id="kpi-evals-summary"></div></div>
       </div>
     </div>
-    <!-- ═══════════════ FIN KPIs ═══════════════ -->
 
     <!-- EVALUACIONES -->
     <div class="page" id="page-evaluaciones">
@@ -846,12 +850,91 @@ firebase.initializeApp(firebaseConfig);
 const db=firebase.firestore();
 
 const COLS={employees:'employees',vacations:'vacations',vacancies:'vacancies',evals:'evaluations',announces:'announcements',courses:'courses',candidates:'candidates',activity:'activity',orgNodes:'orgNodes',departments:'departments'};
-
 window.DB={employees:[],vacations:[],vacancies:[],evals:[],announces:[],courses:[],candidates:[],activity:[],orgNodes:[],departments:[]};
+
+// ══════════════════════════════════════════════
+// SISTEMA DE PRIVACIDAD / MODO CANDADO
+// ══════════════════════════════════════════════
+window.privacyMode = false;
+const MASKED = '••••••';
+
+window.togglePrivacy = () => {
+  window.privacyMode = !window.privacyMode;
+  applyPrivacyMode();
+  renderPage(window.currentPage);
+  const msg = window.privacyMode
+    ? '🔒 Datos de nómina ocultos'
+    : '🔓 Datos de nómina visibles';
+  toast(msg, window.privacyMode ? 'warn' : 'info');
+};
+
+function applyPrivacyMode() {
+  const locked = window.privacyMode;
+  // Botón header
+  const btn = document.getElementById('privacy-btn');
+  const lbl = document.getElementById('privacy-label');
+  const iconLock = document.getElementById('privacy-icon-lock');
+  const iconUnlock = document.getElementById('privacy-icon-unlock');
+  if (locked) {
+    btn.classList.add('locked');
+    iconLock.style.display = 'block';
+    iconUnlock.style.display = 'none';
+    lbl.className = 'locked';
+    lbl.innerHTML = `<svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M11 7V5a3 3 0 0 0-6 0v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><rect x="3" y="7" width="10" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/></svg> Nómina oculta`;
+  } else {
+    btn.classList.remove('locked');
+    iconLock.style.display = 'none';
+    iconUnlock.style.display = 'block';
+    lbl.className = '';
+    lbl.style.display = 'none';
+    lbl.textContent = '';
+  }
+  // Menú lateral: ocultar/mostrar Nóminas
+  const navNominas = document.getElementById('nav-nominas');
+  if (navNominas) navNominas.style.display = locked ? 'none' : '';
+  // Si estoy en la página de nóminas y activo privacidad → redirigir
+  if (locked && window.currentPage === 'nominas') {
+    nav('dashboard', document.querySelector('.nav-item[onclick*="dashboard"]'));
+    return;
+  }
+  // Banner en nóminas
+  const banner = document.getElementById('nominas-privacy-banner');
+  const content = document.getElementById('nominas-content');
+  if (banner && content) {
+    banner.style.display = locked ? 'flex' : 'none';
+    content.style.display = locked ? 'none' : 'block';
+  }
+  // Columna salario en Personal
+  const thSalary = document.getElementById('th-salary');
+  if (thSalary) thSalary.style.display = locked ? 'none' : '';
+  // Tarjetas KPI de masa salarial
+  const kpiMasaCard = document.getElementById('kpi-masa-card');
+  if (kpiMasaCard) kpiMasaCard.style.display = locked ? 'none' : '';
+  const kpiSalaryDeptCard = document.getElementById('kpi-salary-dept-card');
+  if (kpiSalaryDeptCard) kpiSalaryDeptCard.style.display = locked ? 'none' : '';
+  const kpiTopSalariesCard = document.getElementById('kpi-top-salaries-card');
+  if (kpiTopSalariesCard) kpiTopSalariesCard.style.display = locked ? 'none' : '';
+  // Tarjeta de salario en modal de detalle
+  const viewSalaryCard = document.getElementById('view-salary-card');
+  if (viewSalaryCard) {
+    const salaryVal = document.getElementById('view-emp-salary');
+    if (salaryVal) {
+      if (locked) {
+        salaryVal.dataset.real = salaryVal.textContent;
+        salaryVal.textContent = MASKED;
+        salaryVal.style.letterSpacing = '3px';
+      } else if (salaryVal.dataset.real) {
+        salaryVal.textContent = salaryVal.dataset.real;
+        salaryVal.style.letterSpacing = '';
+      }
+    }
+  }
+}
+
+window.maskSalary = val => window.privacyMode ? `<span style="letter-spacing:3px;color:var(--text3)">${MASKED}</span>` : val;
 
 // ── DEPARTAMENTOS ──────────────────────────────────────────────
 function getDepts(){ return DB.departments.map(d=>d.name).sort((a,b)=>a.localeCompare(b)); }
-
 function populateAllDeptSelects(){
   document.querySelectorAll('select[data-dept="true"]').forEach(sel=>{
     const cur=sel.value;
@@ -861,7 +944,6 @@ function populateAllDeptSelects(){
     if(cur&&cur!=='__new__') sel.value=cur;
   });
 }
-
 function handleDeptChange(sel){
   if(sel.value!=='__new__') return;
   const name=prompt('Nombre del nuevo departamento:');
@@ -869,17 +951,12 @@ function handleDeptChange(sel){
   const trimmed=name.trim();
   if(getDepts().includes(trimmed)){sel.value=trimmed;toast(`"${trimmed}" ya existe`,'info');return;}
   const nd={id:nextId(DB.departments),name:trimmed,createdAt:new Date().toISOString()};
-  DB.departments.push(nd);
-  fbSave(COLS.departments,nd);
-  populateAllDeptSelects();
-  updateDeptFilters();
-  sel.value=trimmed;
+  DB.departments.push(nd);fbSave(COLS.departments,nd);
+  populateAllDeptSelects();updateDeptFilters();sel.value=trimmed;
   toast(`✓ Departamento "${trimmed}" creado`,'success');
 }
-
 function updateDeptFilters(){
-  const el=document.getElementById('filter-dept');
-  if(!el) return;
+  const el=document.getElementById('filter-dept');if(!el) return;
   const cur=el.value;
   el.innerHTML='<option value="">Todos los depts.</option>'+getDepts().map(d=>`<option value="${d}">${d}</option>`).join('');
   el.value=cur;
@@ -894,43 +971,20 @@ window.fmtCurrency=v=>'Q'+Number(v).toLocaleString('es-GT');
 window.nextId=arr=>arr.length?Math.max(...arr.map(x=>x.id||0))+1:1;
 window.timeAgo=ts=>{if(!ts) return '—';const d=(Date.now()-new Date(ts))/1000;if(d<60) return 'hace unos segundos';if(d<3600) return `hace ${Math.round(d/60)} min`;if(d<86400) return `hace ${Math.round(d/3600)}h`;return `hace ${Math.round(d/86400)}d`;};
 window.downloadFile=(content,filename,type)=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([content],{type}));a.download=filename;a.click();};
-
 function setFbStatus(state,text){document.getElementById('fb-status').className=state;document.getElementById('fb-status-text').textContent=text;}
-
 function lsSave(){try{const s={};Object.keys(DB).forEach(k=>s[k]=DB[k].map(o=>{const c={...o};delete c._fbId;return c;}));localStorage.setItem('hrms_backup',JSON.stringify(s));}catch(e){}}
 function lsLoad(){try{const r=localStorage.getItem('hrms_backup');if(!r) return false;const s=JSON.parse(r);Object.keys(DB).forEach(k=>{if(s[k]) DB[k]=s[k];});return true;}catch(e){return false;}}
-
-function fbSave(col,obj){
-  lsSave();
-  const id=String(obj.id||obj._fbId||Date.now());
-  const data={...obj};delete data._fbId;obj._fbId=id;
-  db.collection(col).doc(id).set(data).then(()=>setFbStatus('connected','Firebase ✓')).catch(err=>{setFbStatus('error',err.code||'Error');});
-}
-function fbDelete(col,obj){
-  lsSave();
-  db.collection(col).doc(String(obj._fbId||obj.id)).delete().catch(()=>{});
-}
-
+function fbSave(col,obj){lsSave();const id=String(obj.id||obj._fbId||Date.now());const data={...obj};delete data._fbId;obj._fbId=id;db.collection(col).doc(id).set(data).then(()=>setFbStatus('connected','Firebase ✓')).catch(err=>{setFbStatus('error',err.code||'Error');});}
+function fbDelete(col,obj){lsSave();db.collection(col).doc(String(obj._fbId||obj.id)).delete().catch(()=>{});}
 async function loadAllFromFirebase(){
   setFbStatus('connecting','Cargando...');
   try{
     await Promise.all(Object.entries(COLS).map(async([key,col])=>{
-      const snap=await db.collection(col).get();
-      DB[key]=snap.docs.map(d=>({...d.data(),_fbId:d.id}));
-    }));
-    lsSave();
-    setFbStatus('connected','Firebase ✓');
-  }catch(e){
-    if(!lsLoad()) toast('Error al cargar datos','error');
-    setFbStatus('error','Sin conexión');
-  }
+      const snap=await db.collection(col).get();DB[key]=snap.docs.map(d=>({...d.data(),_fbId:d.id}));
+    }));lsSave();setFbStatus('connected','Firebase ✓');
+  }catch(e){if(!lsLoad()) toast('Error al cargar datos','error');setFbStatus('error','Sin conexión');}
 }
-
-window.addActivity=(msg,type='info')=>{
-  const act={id:nextId(DB.activity),msg,type,ts:new Date().toISOString()};
-  DB.activity.unshift(act);DB.activity=DB.activity.slice(0,20);
-  fbSave(COLS.activity,act);
-};
+window.addActivity=(msg,type='info')=>{const act={id:nextId(DB.activity),msg,type,ts:new Date().toISOString()};DB.activity.unshift(act);DB.activity=DB.activity.slice(0,20);fbSave(COLS.activity,act);};
 window.showLoading=msg=>{document.getElementById('loading-msg').textContent=msg||'Cargando...';document.getElementById('loading-overlay').style.display='flex';};
 window.hideLoading=()=>document.getElementById('loading-overlay').style.display='none';
 
@@ -940,18 +994,9 @@ window.currentRole='Admin RRHH';
 window.showTFA=()=>{document.getElementById('login-step1').style.display='none';document.getElementById('login-step2').style.display='block';};
 window.doLogin=async()=>{
   document.getElementById('user-role-label').textContent=window.currentRole;
-  const ls=document.getElementById('login-screen');
-  ls.style.opacity='0';ls.style.transition='opacity 0.4s';
-  showLoading('Conectando con Firebase...');
-  await loadAllFromFirebase();
-  hideLoading();
-  setTimeout(()=>{
-    ls.style.display='none';
-    const app=document.getElementById('app-shell');
-    app.style.display='flex';app.style.opacity='0';app.style.transition='opacity 0.4s';
-    setTimeout(()=>app.style.opacity='1',50);
-    window.initApp();
-  },400);
+  const ls=document.getElementById('login-screen');ls.style.opacity='0';ls.style.transition='opacity 0.4s';
+  showLoading('Conectando con Firebase...');await loadAllFromFirebase();hideLoading();
+  setTimeout(()=>{ls.style.display='none';const app=document.getElementById('app-shell');app.style.display='flex';app.style.opacity='0';app.style.transition='opacity 0.4s';setTimeout(()=>app.style.opacity='1',50);window.initApp();},400);
 };
 
 // ── MODALS ────────────────────────────────────────────────────
@@ -965,14 +1010,14 @@ const headerBtns={dashboard:'Nuevo empleado',departamentos:'Nuevo departamento',
 window.currentPage='dashboard';
 
 window.nav=(page,el)=>{
+  if(page==='nominas'&&window.privacyMode){toast('🔒 Nóminas ocultas — desactiva el modo privacidad','warn');return;}
   document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
   el.classList.add('active');
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+page).classList.add('active');
   document.getElementById('page-title').textContent=pageTitles[page]||page;
   document.getElementById('header-btn-text').textContent=headerBtns[page]||'Nuevo';
-  window.currentPage=page;
-  window.renderPage(page);
+  window.currentPage=page;window.renderPage(page);
 };
 
 window.headerAction=()=>{
@@ -994,19 +1039,15 @@ window.headerAction=()=>{
 
 window.renderPage=page=>{
   const r={dashboard:renderDashboard,departamentos:renderDepartamentos,personal:renderEmployees,organigrama:renderOrganigrama,reclutamiento:renderRecruitment,nominas:renderPayroll,vacaciones:renderVacations,kpis:renderKPIs,evaluaciones:renderEvals,comunicacion:renderComms,formacion:renderCourses};
-  if(r[page]) r[page]();
-  updateBadges();
+  if(r[page]) r[page]();updateBadges();applyPrivacyMode();
 };
 
 // ── DASHBOARD ─────────────────────────────────────────────────
 function renderDashboard(){
   const emps=DB.employees,total=emps.length,active=emps.filter(e=>e.status==='Activo').length,openVac=DB.vacancies.filter(v=>v.status!=='Cerrada').length;
-  document.getElementById('dash-total').textContent=total;
-  document.getElementById('dash-total-sub').textContent=total+' registrados';
-  document.getElementById('dash-active').textContent=active;
-  document.getElementById('dash-active-sub').textContent=total?Math.round(active/total*100)+'% asistencia':'—';
-  document.getElementById('dash-vacancies').textContent=openVac;
-  document.getElementById('dash-vac-sub').textContent=DB.vacancies.filter(v=>v.status==='Urgente').length+' urgentes';
+  document.getElementById('dash-total').textContent=total;document.getElementById('dash-total-sub').textContent=total+' registrados';
+  document.getElementById('dash-active').textContent=active;document.getElementById('dash-active-sub').textContent=total?Math.round(active/total*100)+'% asistencia':'—';
+  document.getElementById('dash-vacancies').textContent=openVac;document.getElementById('dash-vac-sub').textContent=DB.vacancies.filter(v=>v.status==='Urgente').length+' urgentes';
   document.getElementById('dash-evals').textContent=Math.max(0,total-DB.evals.length);
   const recent=[...emps].sort((a,b)=>new Date(b.joinDate)-new Date(a.joinDate)).slice(0,4);
   const re=document.getElementById('dash-recent-employees');
@@ -1018,8 +1059,7 @@ function renderDashboard(){
   const depts=getDepts(),maxC=Math.max(1,...depts.map(d=>emps.filter(e=>e.dept===d).length));
   document.getElementById('dash-dept-bars').innerHTML=depts.map((d,i)=>{const c=emps.filter(e=>e.dept===d).length;if(!c) return '';return `<div class="bar-row"><div class="bar-label">${d}</div><div class="bar-track"><div class="bar-fill" style="width:${Math.round(c/maxC*100)}%;background:${PALETA[i%PALETA.length]}"></div></div><div class="bar-val">${c}</div></div>`;}).join('')||'<div class="empty-state" style="padding:20px"><p>Sin departamentos</p></div>';
   const pct=total?Math.round(active/total*100):0;
-  document.getElementById('donut-active').setAttribute('stroke-dasharray',`${Math.round(pct*3.14159)} 314`);
-  document.getElementById('donut-pct').textContent=pct+'%';
+  document.getElementById('donut-active').setAttribute('stroke-dasharray',`${Math.round(pct*3.14159)} 314`);document.getElementById('donut-pct').textContent=pct+'%';
   const statuses=[{s:'Activo',c:'var(--green)'},{s:'En prueba',c:'var(--amber)'},{s:'Vacaciones',c:'var(--accent)'},{s:'Baja médica',c:'var(--red)'}];
   document.getElementById('dash-status-legend').innerHTML=statuses.map(s=>{const c=emps.filter(e=>e.status===s.s).length;if(!c) return '';return `<div style="text-align:center"><div style="font-size:16px;font-weight:600;color:${s.c}">${c}</div><div style="font-size:10px;color:var(--text3)">${s.s}</div></div>`;}).join('');
   const alerts=[];
@@ -1032,102 +1072,81 @@ function renderDashboard(){
 // ── EMPLOYEES ────────────────────────────────────────────────
 function renderEmployees(){
   updateDeptFilters();
-  const fd=document.getElementById('filter-dept')?.value||'';
-  const fs=document.getElementById('filter-status')?.value||'';
-  let list=[...DB.employees];
-  if(fd) list=list.filter(e=>e.dept===fd);
-  if(fs) list=list.filter(e=>e.status===fs);
-  document.getElementById('p-total').textContent=DB.employees.length;
-  document.getElementById('p-active').textContent=DB.employees.filter(e=>e.status==='Activo').length;
-  document.getElementById('p-trial').textContent=DB.employees.filter(e=>e.status==='En prueba').length;
-  document.getElementById('p-away').textContent=DB.employees.filter(e=>['Vacaciones','Baja médica'].includes(e.status)).length;
+  const fd=document.getElementById('filter-dept')?.value||'';const fs=document.getElementById('filter-status')?.value||'';
+  let list=[...DB.employees];if(fd) list=list.filter(e=>e.dept===fd);if(fs) list=list.filter(e=>e.status===fs);
+  document.getElementById('p-total').textContent=DB.employees.length;document.getElementById('p-active').textContent=DB.employees.filter(e=>e.status==='Activo').length;
+  document.getElementById('p-trial').textContent=DB.employees.filter(e=>e.status==='En prueba').length;document.getElementById('p-away').textContent=DB.employees.filter(e=>['Vacaciones','Baja médica'].includes(e.status)).length;
+  // Mostrar/ocultar columna salario
+  const thSalary=document.getElementById('th-salary');if(thSalary) thSalary.style.display=window.privacyMode?'none':'';
   const tbody=document.getElementById('employees-tbody');
   if(!list.length){tbody.innerHTML=`<tr><td colspan="7"><div class="empty-state"><h3>Sin empleados</h3><p>Añade el primero con el botón de arriba</p></div></td></tr>`;return;}
-  tbody.innerHTML=list.map(e=>`<tr><td><div class="emp-row"><div class="emp-avatar" style="background:${getColor(e.name)};font-size:11px;">${initials(e.name)}</div><div><div class="emp-name">${e.name}</div><div class="emp-dept">${e.email}</div></div></div></td><td style="color:var(--text2)">${e.dept}</td><td style="color:var(--text2)">${e.role}</td><td><span class="badge ${e.contract.includes('Indefinido')?'badge-blue':'badge-amber'}">${e.contract}</span></td><td style="font-family:var(--mono);font-size:12px;">${fmtCurrency(e.salary)}</td><td>${statusBadge(e.status)}</td><td><button class="btn btn-ghost" onclick="openEmployeeDetail(${e.id})" style="padding:4px 10px;font-size:11px;">Ver</button></td></tr>`).join('');
+  tbody.innerHTML=list.map(e=>`<tr>
+    <td><div class="emp-row"><div class="emp-avatar" style="background:${getColor(e.name)};font-size:11px;">${initials(e.name)}</div><div><div class="emp-name">${e.name}</div><div class="emp-dept">${e.email}</div></div></div></td>
+    <td style="color:var(--text2)">${e.dept}</td>
+    <td style="color:var(--text2)">${e.role}</td>
+    <td><span class="badge ${e.contract.includes('Indefinido')?'badge-blue':'badge-amber'}">${e.contract}</span></td>
+    <td style="${window.privacyMode?'display:none':''};font-family:var(--mono);font-size:12px;">${window.privacyMode?'':fmtCurrency(e.salary)}</td>
+    <td>${statusBadge(e.status)}</td>
+    <td><button class="btn btn-ghost" onclick="openEmployeeDetail(${e.id})" style="padding:4px 10px;font-size:11px;">Ver</button></td>
+  </tr>`).join('');
+  // Ocultar celdas de salario si privacyMode
+  if(window.privacyMode){document.querySelectorAll('#employees-tbody tr td:nth-child(5)').forEach(td=>td.style.display='none');}
 }
 
 window.openEmployeeDetail=id=>{
   const e=DB.employees.find(x=>x.id===id);if(!e) return;
   document.getElementById('view-emp-title').textContent=e.name;
-  document.getElementById('view-avatar').style.background=getColor(e.name);
-  document.getElementById('view-avatar').textContent=initials(e.name);
-  document.getElementById('view-emp-name').textContent=e.name;
-  document.getElementById('view-emp-role-dept').textContent=`${e.role} · ${e.dept}`;
+  document.getElementById('view-avatar').style.background=getColor(e.name);document.getElementById('view-avatar').textContent=initials(e.name);
+  document.getElementById('view-emp-name').textContent=e.name;document.getElementById('view-emp-role-dept').textContent=`${e.role} · ${e.dept}`;
   const sb=document.getElementById('view-emp-status-badge');sb.className='badge '+statusClass(e.status);sb.textContent=e.status;
-  document.getElementById('view-emp-email').textContent=e.email;
-  document.getElementById('view-emp-phone').textContent=e.phone||'—';
-  document.getElementById('view-emp-dept2').textContent=e.dept;
-  document.getElementById('view-emp-contract').textContent=e.contract;
-  document.getElementById('view-emp-salary').textContent=fmtCurrency(e.salary);
+  document.getElementById('view-emp-email').textContent=e.email;document.getElementById('view-emp-phone').textContent=e.phone||'—';
+  document.getElementById('view-emp-dept2').textContent=e.dept;document.getElementById('view-emp-contract').textContent=e.contract;
+  const salaryEl=document.getElementById('view-emp-salary');
+  if(window.privacyMode){salaryEl.textContent=MASKED;salaryEl.style.letterSpacing='3px';salaryEl.style.color='var(--text3)';}
+  else{salaryEl.textContent=fmtCurrency(e.salary);salaryEl.style.letterSpacing='';salaryEl.style.color='var(--green)';}
   document.getElementById('view-emp-joindate').textContent=e.joinDate||'—';
-  document.getElementById('ee-id').value=e.id;
-  document.getElementById('ee-name').value=e.name;
-  document.getElementById('ee-email').value=e.email;
-  populateAllDeptSelects();
-  document.getElementById('ee-dept').value=e.dept;
-  document.getElementById('ee-role').value=e.role;
-  document.getElementById('ee-salary').value=e.salary;
-  document.getElementById('ee-contract').value=e.contract;
-  document.getElementById('ee-status').value=e.status;
-  document.getElementById('ee-phone').value=e.phone||'';
-  switchEmpTab('info',document.querySelector('#modal-emp-view .tab'));
-  document.getElementById('save-emp-btn').style.display='none';
+  document.getElementById('ee-id').value=e.id;document.getElementById('ee-name').value=e.name;document.getElementById('ee-email').value=e.email;
+  populateAllDeptSelects();document.getElementById('ee-dept').value=e.dept;document.getElementById('ee-role').value=e.role;
+  document.getElementById('ee-salary').value=e.salary;document.getElementById('ee-contract').value=e.contract;document.getElementById('ee-status').value=e.status;document.getElementById('ee-phone').value=e.phone||'';
+  switchEmpTab('info',document.querySelector('#modal-emp-view .tab'));document.getElementById('save-emp-btn').style.display='none';
   openModal('modal-emp-view');
 };
 
 window.switchEmpTab=(tab,el)=>{
-  document.querySelectorAll('#modal-emp-view .tab').forEach(t=>t.classList.remove('active'));
-  if(el) el.classList.add('active');
-  document.getElementById('emp-tab-info').style.display=tab==='info'?'block':'none';
-  document.getElementById('emp-tab-edit').style.display=tab==='edit'?'block':'none';
+  document.querySelectorAll('#modal-emp-view .tab').forEach(t=>t.classList.remove('active'));if(el) el.classList.add('active');
+  document.getElementById('emp-tab-info').style.display=tab==='info'?'block':'none';document.getElementById('emp-tab-edit').style.display=tab==='edit'?'block':'none';
   document.getElementById('save-emp-btn').style.display=tab==='edit'?'flex':'none';
 };
 
 window.submitAddEmployee=e=>{
   e.preventDefault();
-  const name=document.getElementById('ea-name').value.trim();
-  const email=document.getElementById('ea-email').value.trim();
-  const dept=document.getElementById('ea-dept').value.replace('__new__','').trim();
-  if(!name||!email) return toast('Completa los campos requeridos','error');
-  if(!dept) return toast('Selecciona un departamento','error');
+  const name=document.getElementById('ea-name').value.trim(),email=document.getElementById('ea-email').value.trim(),dept=document.getElementById('ea-dept').value.replace('__new__','').trim();
+  if(!name||!email) return toast('Completa los campos requeridos','error');if(!dept) return toast('Selecciona un departamento','error');
   const emp={id:nextId(DB.employees),name,email,dept,role:document.getElementById('ea-role').value.trim(),contract:document.getElementById('ea-contract').value,salary:parseFloat(document.getElementById('ea-salary').value)||3000,status:document.getElementById('ea-status').value,joinDate:document.getElementById('ea-joindate').value||new Date().toISOString().split('T')[0],phone:document.getElementById('ea-phone').value.trim()};
-  DB.employees.push(emp);fbSave(COLS.employees,emp);
-  addActivity(`Empleado ${name} agregado`,'emp');
-  closeAllModals();document.getElementById('form-emp-add').reset();
-  renderPage(window.currentPage);updateBadges();
-  toast(`✓ ${name} agregado`,'success');
+  DB.employees.push(emp);fbSave(COLS.employees,emp);addActivity(`Empleado ${name} agregado`,'emp');closeAllModals();document.getElementById('form-emp-add').reset();renderPage(window.currentPage);updateBadges();toast(`✓ ${name} agregado`,'success');
 };
 
 window.submitEditEmployee=e=>{
-  e.preventDefault();
-  const id=parseInt(document.getElementById('ee-id').value);
-  const idx=DB.employees.findIndex(x=>x.id===id);if(idx===-1) return;
+  e.preventDefault();const id=parseInt(document.getElementById('ee-id').value);const idx=DB.employees.findIndex(x=>x.id===id);if(idx===-1) return;
   DB.employees[idx]={...DB.employees[idx],name:document.getElementById('ee-name').value.trim(),email:document.getElementById('ee-email').value.trim(),dept:document.getElementById('ee-dept').value.replace('__new__','').trim()||DB.employees[idx].dept,role:document.getElementById('ee-role').value.trim(),salary:parseFloat(document.getElementById('ee-salary').value)||DB.employees[idx].salary,contract:document.getElementById('ee-contract').value,status:document.getElementById('ee-status').value,phone:document.getElementById('ee-phone').value.trim()};
-  fbSave(COLS.employees,DB.employees[idx]);addActivity(`Empleado ${DB.employees[idx].name} actualizado`,'emp');
-  closeAllModals();renderPage(window.currentPage);toast('✓ Empleado actualizado','success');
+  fbSave(COLS.employees,DB.employees[idx]);addActivity(`Empleado ${DB.employees[idx].name} actualizado`,'emp');closeAllModals();renderPage(window.currentPage);toast('✓ Empleado actualizado','success');
 };
 
 window.deleteEmployee=()=>{
-  const id=parseInt(document.getElementById('ee-id').value);
-  const emp=DB.employees.find(x=>x.id===id);if(!emp) return;
+  const id=parseInt(document.getElementById('ee-id').value);const emp=DB.employees.find(x=>x.id===id);if(!emp) return;
   if(!confirm(`¿Eliminar a ${emp.name}?`)) return;
-  DB.employees=DB.employees.filter(x=>x.id!==id);fbDelete(COLS.employees,emp);
-  addActivity(`Empleado ${emp.name} eliminado`,'emp');closeAllModals();renderPage(window.currentPage);toast(`${emp.name} eliminado`,'warn');
+  DB.employees=DB.employees.filter(x=>x.id!==id);fbDelete(COLS.employees,emp);addActivity(`Empleado ${emp.name} eliminado`,'emp');closeAllModals();renderPage(window.currentPage);toast(`${emp.name} eliminado`,'warn');
 };
 
 // ── DEPARTAMENTOS ────────────────────────────────────────────
 function renderDepartamentos(){
   const all=getDepts(),custom=DB.departments;
-  document.getElementById('dept-total').textContent=all.length;
-  document.getElementById('dept-custom-count').textContent=custom.length;
-  document.getElementById('dept-default-count').textContent=all.filter(d=>!DB.employees.some(e=>e.dept===d)).length;
-  document.getElementById('dept-with-emp').textContent=all.filter(d=>DB.employees.some(e=>e.dept===d)).length;
+  document.getElementById('dept-total').textContent=all.length;document.getElementById('dept-custom-count').textContent=custom.length;
+  document.getElementById('dept-default-count').textContent=all.filter(d=>!DB.employees.some(e=>e.dept===d)).length;document.getElementById('dept-with-emp').textContent=all.filter(d=>DB.employees.some(e=>e.dept===d)).length;
   const grid=document.getElementById('dept-grid');
   if(!all.length){grid.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text3);"><div style="font-size:48px;margin-bottom:14px;">🏢</div><div style="font-size:15px;font-weight:500;color:var(--text2);margin-bottom:8px;">Sin departamentos</div><div style="font-size:13px;margin-bottom:20px;">Crea el primero para comenzar.</div><button class="btn btn-primary" onclick="openAddDeptModal()" style="margin:0 auto;">+ Crear primer departamento</button></div>`;return;}
   grid.innerHTML=all.map((d,i)=>{
-    const count=DB.employees.filter(e=>e.dept===d).length;
-    const color=PALETA[i%PALETA.length];
-    const obj=DB.departments.find(x=>x.name===d);
+    const count=DB.employees.filter(e=>e.dept===d).length,color=PALETA[i%PALETA.length],obj=DB.departments.find(x=>x.name===d);
     return `<div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;transition:border-color 0.15s;" onmouseover="this.style.borderColor='var(--border2)'" onmouseout="this.style.borderColor='var(--border)'">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
         <div style="width:36px;height:36px;border-radius:10px;background:${color}22;border:1px solid ${color}44;display:flex;align-items:center;justify-content:center;font-size:16px;">🏢</div>
@@ -1142,67 +1161,19 @@ function renderDepartamentos(){
     </div>`;
   }).join('');
 }
-
 window.openAddDeptModal=()=>{document.getElementById('dept-name').value='';document.getElementById('dept-desc').value='';openModal('modal-dept-add');};
-window.submitDept=e=>{
-  e.preventDefault();
-  const name=document.getElementById('dept-name').value.trim();
-  if(!name) return toast('Ingresa un nombre','error');
-  if(getDepts().includes(name)) return toast(`"${name}" ya existe`,'error');
-  const nd={id:nextId(DB.departments),name,desc:document.getElementById('dept-desc').value.trim(),createdAt:new Date().toISOString()};
-  DB.departments.push(nd);fbSave(COLS.departments,nd);lsSave();
-  populateAllDeptSelects();updateDeptFilters();closeAllModals();
-  addActivity(`Departamento "${name}" creado`,'emp');renderDepartamentos();
-  toast(`✓ Departamento "${name}" creado`,'success');
-};
-window.deleteDept=name=>{
-  const inUse=DB.employees.some(e=>e.dept===name);
-  if(inUse) return toast(`No se puede eliminar: ${DB.employees.filter(e=>e.dept===name).length} empleado(s) lo usan`,'error');
-  if(!confirm(`¿Eliminar departamento "${name}"?`)) return;
-  const nd=DB.departments.find(d=>d.name===name);
-  DB.departments=DB.departments.filter(d=>d.name!==name);
-  if(nd) fbDelete(COLS.departments,nd);lsSave();
-  populateAllDeptSelects();updateDeptFilters();renderDepartamentos();
-  toast(`Departamento "${name}" eliminado`,'warn');
-};
+window.submitDept=e=>{e.preventDefault();const name=document.getElementById('dept-name').value.trim();if(!name) return toast('Ingresa un nombre','error');if(getDepts().includes(name)) return toast(`"${name}" ya existe`,'error');const nd={id:nextId(DB.departments),name,desc:document.getElementById('dept-desc').value.trim(),createdAt:new Date().toISOString()};DB.departments.push(nd);fbSave(COLS.departments,nd);lsSave();populateAllDeptSelects();updateDeptFilters();closeAllModals();addActivity(`Departamento "${name}" creado`,'emp');renderDepartamentos();toast(`✓ Departamento "${name}" creado`,'success');};
+window.deleteDept=name=>{const inUse=DB.employees.some(e=>e.dept===name);if(inUse) return toast(`No se puede eliminar: ${DB.employees.filter(e=>e.dept===name).length} empleado(s) lo usan`,'error');if(!confirm(`¿Eliminar departamento "${name}"?`)) return;const nd=DB.departments.find(d=>d.name===name);DB.departments=DB.departments.filter(d=>d.name!==name);if(nd) fbDelete(COLS.departments,nd);lsSave();populateAllDeptSelects();updateDeptFilters();renderDepartamentos();toast(`Departamento "${name}" eliminado`,'warn');};
 
 // ── ORGANIGRAMA ───────────────────────────────────────────────
 function renderOrganigrama(){
   const root=document.getElementById('org-tree-root');
   if(!DB.orgNodes.length){root.innerHTML=`<div class="org-empty"><div style="font-size:48px;margin-bottom:14px;">🏢</div><div style="font-size:15px;font-weight:500;color:var(--text2);margin-bottom:8px;">Organigrama vacío</div><button class="btn btn-primary" onclick="openAddOrgNode(null)" style="margin:0 auto;">+ Agregar primer puesto</button></div>`;return;}
-  const cm={};DB.orgNodes.forEach(n=>{cm[n.id]=[];});
-  DB.orgNodes.forEach(n=>{if(n.parentId&&cm[n.parentId]) cm[n.parentId].push(n);});
-  Object.keys(cm).forEach(k=>{cm[k].sort((a,b)=>(a.order||0)-(b.order||0));});
-  const roots=DB.orgNodes.filter(n=>!n.parentId);
-  function buildHTML(node,level){
-    const ch=cm[node.id]||[],lc=['level-0','level-1','level-2','level-3'][Math.min(level,3)];
-    const sibs=DB.orgNodes.filter(n=>(n.parentId||null)===(node.parentId||null));
-    const idx=sibs.findIndex(n=>n.id===node.id);
-    return `<div class="org-node-col">
-      <div class="org-node ${lc}" onclick="openAddOrgNode(${node.id})">
-        <div class="org-node-actions">
-          ${idx>0?`<button class="org-act-btn org-act-up" onclick="event.stopPropagation();moveOrgNode(${node.id},-1)">↑</button>`:''}
-          ${idx<sibs.length-1?`<button class="org-act-btn org-act-down" onclick="event.stopPropagation();moveOrgNode(${node.id},1)">↓</button>`:''}
-          <button class="org-act-btn org-act-edit" onclick="event.stopPropagation();openEditOrgNode(${node.id})">✎</button>
-          <button class="org-act-btn org-act-del" onclick="event.stopPropagation();deleteOrgNode(${node.id})">✕</button>
-        </div>
-        <div class="org-node-avatar" style="background:${getColor(node.name)}">${initials(node.name)}</div>
-        <div class="org-node-name">${node.name}</div>
-        <div class="org-node-role">${node.role}</div>
-        ${node.dept?`<div class="org-node-dept">${node.dept}</div>`:''}
-      </div>
-      <button class="org-add-child-btn" onclick="event.stopPropagation();openAddOrgNode(${node.id})">+</button>
-      ${ch.length?`<div style="display:flex;flex-direction:column;align-items:center;"><div style="width:1.5px;height:24px;background:var(--border2);"></div></div><div style="display:flex;gap:20px;align-items:flex-start;position:relative;">${ch.length>1?'<div style="position:absolute;top:0;left:0;right:0;height:1.5px;background:var(--border2);z-index:1;margin:0 70px;"></div>':''}${ch.map(c=>`<div style="display:flex;flex-direction:column;align-items:center;"><div style="width:1.5px;height:16px;background:var(--border2);"></div>${buildHTML(c,level+1)}</div>`).join('')}</div>`:''}
-    </div>`;
-  }
+  const cm={};DB.orgNodes.forEach(n=>{cm[n.id]=[];});DB.orgNodes.forEach(n=>{if(n.parentId&&cm[n.parentId]) cm[n.parentId].push(n);});Object.keys(cm).forEach(k=>{cm[k].sort((a,b)=>(a.order||0)-(b.order||0));});const roots=DB.orgNodes.filter(n=>!n.parentId);
+  function buildHTML(node,level){const ch=cm[node.id]||[],lc=['level-0','level-1','level-2','level-3'][Math.min(level,3)];const sibs=DB.orgNodes.filter(n=>(n.parentId||null)===(node.parentId||null));const idx=sibs.findIndex(n=>n.id===node.id);return `<div class="org-node-col"><div class="org-node ${lc}" onclick="openAddOrgNode(${node.id})"><div class="org-node-actions">${idx>0?`<button class="org-act-btn org-act-up" onclick="event.stopPropagation();moveOrgNode(${node.id},-1)">↑</button>`:''}${idx<sibs.length-1?`<button class="org-act-btn org-act-down" onclick="event.stopPropagation();moveOrgNode(${node.id},1)">↓</button>`:''}<button class="org-act-btn org-act-edit" onclick="event.stopPropagation();openEditOrgNode(${node.id})">✎</button><button class="org-act-btn org-act-del" onclick="event.stopPropagation();deleteOrgNode(${node.id})">✕</button></div><div class="org-node-avatar" style="background:${getColor(node.name)}">${initials(node.name)}</div><div class="org-node-name">${node.name}</div><div class="org-node-role">${node.role}</div>${node.dept?`<div class="org-node-dept">${node.dept}</div>`:''}</div><button class="org-add-child-btn" onclick="event.stopPropagation();openAddOrgNode(${node.id})">+</button>${ch.length?`<div style="display:flex;flex-direction:column;align-items:center;"><div style="width:1.5px;height:24px;background:var(--border2);"></div></div><div style="display:flex;gap:20px;align-items:flex-start;position:relative;">${ch.length>1?'<div style="position:absolute;top:0;left:0;right:0;height:1.5px;background:var(--border2);z-index:1;margin:0 70px;"></div>':''}${ch.map(c=>`<div style="display:flex;flex-direction:column;align-items:center;"><div style="width:1.5px;height:16px;background:var(--border2);"></div>${buildHTML(c,level+1)}</div>`).join('')}</div>`:''}</div>`;}
   root.innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;padding:16px 24px 32px;">${roots.map(r=>`<div style="display:flex;flex-direction:column;align-items:center;">${buildHTML(r,0)}</div>`).join('<div style="width:40px;height:32px;"></div>')}</div>`;
 }
-
-function populateOrgParent(ex){
-  const sel=document.getElementById('org-node-parent');sel.innerHTML='<option value="">— Sin supervisor (nodo raíz) —</option>';
-  function addOpts(nodes,level){nodes.forEach(n=>{if(n.id===ex) return;sel.innerHTML+=`<option value="${n.id}">${'　'.repeat(level)}${n.name} — ${n.role}</option>`;addOpts(DB.orgNodes.filter(c=>c.parentId===n.id),level+1);});}
-  addOpts(DB.orgNodes.filter(n=>!n.parentId),0);
-}
+function populateOrgParent(ex){const sel=document.getElementById('org-node-parent');sel.innerHTML='<option value="">— Sin supervisor (nodo raíz) —</option>';function addOpts(nodes,level){nodes.forEach(n=>{if(n.id===ex) return;sel.innerHTML+=`<option value="${n.id}">${'　'.repeat(level)}${n.name} — ${n.role}</option>`;addOpts(DB.orgNodes.filter(c=>c.parentId===n.id),level+1);});}addOpts(DB.orgNodes.filter(n=>!n.parentId),0);}
 window.openAddOrgNode=pid=>{document.getElementById('org-modal-title').textContent=pid?'Agregar subordinado':'Agregar puesto';document.getElementById('org-node-id').value='';document.getElementById('org-name').value='';document.getElementById('org-role').value='';document.getElementById('org-dept').value='';populateOrgParent(null);document.getElementById('org-node-parent').value=pid||'';openModal('modal-org-node');};
 window.openEditOrgNode=id=>{const n=DB.orgNodes.find(x=>x.id===id);if(!n) return;document.getElementById('org-modal-title').textContent='Editar puesto';document.getElementById('org-node-id').value=id;document.getElementById('org-name').value=n.name;document.getElementById('org-role').value=n.role;document.getElementById('org-dept').value=n.dept||'';populateOrgParent(id);document.getElementById('org-node-parent').value=n.parentId||'';openModal('modal-org-node');};
 window.submitOrgNode=e=>{e.preventDefault();const id=document.getElementById('org-node-id').value,pid=document.getElementById('org-node-parent').value,parentId=pid?parseInt(pid):null,name=document.getElementById('org-name').value.trim(),role=document.getElementById('org-role').value.trim(),dept=document.getElementById('org-dept').value.trim();if(id){const n=DB.orgNodes.find(x=>x.id===parseInt(id));if(n){n.name=name;n.role=role;n.dept=dept;n.parentId=parentId;fbSave(COLS.orgNodes,n);}}else{const nn={id:nextId(DB.orgNodes),name,role,dept,parentId,order:DB.orgNodes.filter(n=>(n.parentId||null)===parentId).length};DB.orgNodes.push(nn);fbSave(COLS.orgNodes,nn);}addActivity(`Organigrama: "${name}" ${id?'actualizado':'agregado'}`,'org');closeAllModals();renderOrganigrama();toast(`✓ ${id?'Actualizado':'Agregado'}`,'success');};
@@ -1212,16 +1183,13 @@ window.deleteOrgNode=id=>{function desc(nid){const ch=DB.orgNodes.filter(n=>n.pa
 // ── RECRUITMENT ───────────────────────────────────────────────
 function renderRecruitment(){
   const openV=DB.vacancies.filter(v=>v.status!=='Cerrada').length;
-  document.getElementById('r-vacancies').textContent=openV;
-  document.getElementById('r-candidates').textContent=DB.candidates.length;
-  document.getElementById('r-interviews').textContent=DB.candidates.filter(c=>c.stage.includes('Entrevista')).length;
-  document.getElementById('badge-rec').textContent=openV;
+  document.getElementById('r-vacancies').textContent=openV;document.getElementById('r-candidates').textContent=DB.candidates.length;document.getElementById('r-interviews').textContent=DB.candidates.filter(c=>c.stage.includes('Entrevista')).length;document.getElementById('badge-rec').textContent=openV;
   const cl=document.getElementById('candidates-list');
   if(!DB.candidates.length){cl.innerHTML='<div class="empty-state" style="padding:30px"><p>Sin candidatos.</p></div>';}
   else{const sc={'Screening':'badge-blue','1ª Entrevista':'badge-amber','Prueba técnica':'badge-blue','Entrevista final':'badge-purple','Ofertado':'badge-green','Rechazado':'badge-red'};const sp={'Screening':20,'1ª Entrevista':35,'Prueba técnica':55,'Entrevista final':80,'Ofertado':100,'Rechazado':100};cl.innerHTML='<div style="display:flex;flex-direction:column;gap:10px;">'+DB.candidates.map(c=>`<div class="cand-card"><div class="cand-header"><div class="emp-avatar" style="background:${getColor(c.name)};font-size:11px;">${initials(c.name)}</div><div class="cand-info"><div class="cand-name">${c.name}</div><div class="cand-pos">${c.position} · ${c.exp} años</div></div><span class="badge ${sc[c.stage]||'badge-blue'}">${c.stage}</span></div><div class="cand-skills">${(c.skills||[]).map(s=>`<span class="skill-tag">${s}</span>`).join('')}</div><div class="progress"><div class="progress-fill" style="width:${sp[c.stage]||30}%;background:${c.stage==='Rechazado'?'var(--red)':'var(--accent)'}"></div></div><div style="display:flex;gap:6px;justify-content:flex-end;"><button class="btn btn-ghost" onclick="advanceCandidate(${c.id})" style="padding:3px 10px;font-size:11px;color:var(--green)">Avanzar</button><button class="btn btn-ghost" onclick="removeCandidate(${c.id})" style="padding:3px 10px;font-size:11px;color:var(--red)">Descartar</button></div></div>`).join('')+'</div>';}
   const vt=document.getElementById('vacancies-tbody');
   if(!DB.vacancies.length){vt.innerHTML='<tr><td colspan="4"><div class="empty-state" style="padding:20px"><p>Sin vacantes</p></div></td></tr>';}
-  else{vt.innerHTML=DB.vacancies.map(v=>`<tr><td><div style="font-size:13px;font-weight:500">${v.title}</div><div style="font-size:11px;color:var(--text3)">${v.modality} · ${fmtCurrency(v.salary)}</div></td><td style="color:var(--text2);font-size:12px">${v.dept}</td><td>${vacancyStatusBadge(v.status)}</td><td><button class="btn btn-ghost" onclick="closeVacancy(${v.id})" style="padding:3px 10px;font-size:11px;color:var(--red)">Cerrar</button></td></tr>`).join('');}
+  else{vt.innerHTML=DB.vacancies.map(v=>`<tr><td><div style="font-size:13px;font-weight:500">${v.title}</div><div style="font-size:11px;color:var(--text3)">${v.modality} · ${window.privacyMode?MASKED:fmtCurrency(v.salary)}</div></td><td style="color:var(--text2);font-size:12px">${v.dept}</td><td>${vacancyStatusBadge(v.status)}</td><td><button class="btn btn-ghost" onclick="closeVacancy(${v.id})" style="padding:3px 10px;font-size:11px;color:var(--red)">Cerrar</button></td></tr>`).join('');}
 }
 window.advanceCandidate=id=>{const stages=['Screening','1ª Entrevista','Prueba técnica','Entrevista final','Ofertado'];const c=DB.candidates.find(x=>x.id===id);if(!c) return;const idx=stages.indexOf(c.stage);if(idx>=0&&idx<stages.length-1){c.stage=stages[idx+1];fbSave(COLS.candidates,c);renderRecruitment();toast(`${c.name} → ${c.stage}`,'info');}else toast('Ya está en la etapa final','warn');};
 window.removeCandidate=id=>{const c=DB.candidates.find(x=>x.id===id);if(!c||!confirm(`¿Descartar a ${c.name}?`)) return;DB.candidates=DB.candidates.filter(x=>x.id!==id);fbDelete(COLS.candidates,c);renderRecruitment();toast(`${c.name} descartado`,'warn');};
@@ -1231,10 +1199,11 @@ window.submitCandidate=e=>{e.preventDefault();const c={id:nextId(DB.candidates),
 
 // ── PAYROLL ───────────────────────────────────────────────────
 function renderPayroll(){
+  const banner=document.getElementById('nominas-privacy-banner'),content=document.getElementById('nominas-content');
+  if(window.privacyMode){if(banner){banner.style.display='flex';}if(content){content.style.display='none';}return;}
+  if(banner) banner.style.display='none';if(content) content.style.display='block';
   const emps=DB.employees,total=emps.reduce((s,e)=>s+e.salary,0),avg=emps.length?Math.round(total/emps.length):0;
-  document.getElementById('nom-total').textContent=fmtCurrency(total);
-  document.getElementById('nom-avg').textContent=fmtCurrency(avg);
-  document.getElementById('nom-count').textContent=emps.length;
+  document.getElementById('nom-total').textContent=fmtCurrency(total);document.getElementById('nom-avg').textContent=fmtCurrency(avg);document.getElementById('nom-count').textContent=emps.length;
   const now=new Date();document.getElementById('nom-next').textContent=new Date(now.getFullYear(),now.getMonth()+1,0).toLocaleDateString('es-GT',{day:'numeric',month:'short'});
   const top=[...emps].sort((a,b)=>b.salary-a.salary).slice(0,10);
   document.getElementById('salary-tbody').innerHTML=top.length?top.map(e=>`<tr><td><div class="emp-row"><div class="emp-avatar" style="background:${getColor(e.name)};font-size:10px;width:26px;height:26px;">${initials(e.name)}</div><div class="emp-name">${e.name}</div></div></td><td style="color:var(--text2);font-size:12px">${e.dept}</td><td style="font-family:var(--mono);font-size:13px;font-weight:600;color:var(--green)">${fmtCurrency(e.salary)}</td></tr>`).join(''):'<tr><td colspan="3"><div class="empty-state" style="padding:20px"><p>Sin empleados</p></div></td></tr>';
@@ -1242,16 +1211,15 @@ function renderPayroll(){
   const maxR=Math.max(1,...ranges.map(r=>emps.filter(e=>e.salary>r.min&&e.salary<=r.max).length));
   document.getElementById('salary-dist').innerHTML=ranges.map(r=>{const count=emps.filter(e=>e.salary>r.min&&e.salary<=r.max).length;return `<div style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px;"><span style="color:var(--text2)">${r.l}</span><span style="color:var(--text3);font-family:var(--mono)">${count} emp.</span></div><div class="progress"><div class="progress-fill" style="width:${Math.round(count/maxR*100)}%;background:${r.c}"></div></div></div>`;}).join('');
 }
-window.exportPayroll=()=>{const emps=DB.employees,total=emps.reduce((s,e)=>s+e.salary,0);let csv='Nombre,Departamento,Puesto,Contrato,Salario (Q)\n';emps.forEach(e=>{csv+=`${e.name},${e.dept},${e.role},${e.contract},${e.salary}\n`;});csv+=`\nTOTAL MASA SALARIAL,,,,${total}\n`;downloadFile(csv,'nomina_'+new Date().toISOString().split('T')[0]+'.csv','text/csv');toast('✓ Nómina exportada','success');};
+window.exportPayroll=()=>{
+  if(window.privacyMode){toast('🔒 Desactiva el modo privacidad para exportar nómina','error');return;}
+  const emps=DB.employees,total=emps.reduce((s,e)=>s+e.salary,0);let csv='Nombre,Departamento,Puesto,Contrato,Salario (Q)\n';emps.forEach(e=>{csv+=`${e.name},${e.dept},${e.role},${e.contract},${e.salary}\n`;});csv+=`\nTOTAL MASA SALARIAL,,,,${total}\n`;downloadFile(csv,'nomina_'+new Date().toISOString().split('T')[0]+'.csv','text/csv');toast('✓ Nómina exportada','success');
+};
 
 // ── VACATIONS ─────────────────────────────────────────────────
 function renderVacations(){
   const p=DB.vacations.filter(v=>v.status==='Pendiente').length;
-  document.getElementById('vac-pending').textContent=p;
-  document.getElementById('vac-approved').textContent=DB.vacations.filter(v=>v.status==='Aprobada').length;
-  document.getElementById('vac-rejected').textContent=DB.vacations.filter(v=>v.status==='Rechazada').length;
-  document.getElementById('vac-total').textContent=DB.vacations.length;
-  document.getElementById('badge-vac').textContent=p;
+  document.getElementById('vac-pending').textContent=p;document.getElementById('vac-approved').textContent=DB.vacations.filter(v=>v.status==='Aprobada').length;document.getElementById('vac-rejected').textContent=DB.vacations.filter(v=>v.status==='Rechazada').length;document.getElementById('vac-total').textContent=DB.vacations.length;document.getElementById('badge-vac').textContent=p;
   const tbody=document.getElementById('vacations-tbody');
   if(!DB.vacations.length){tbody.innerHTML='<tr><td colspan="8"><div class="empty-state" style="padding:30px"><p>Sin solicitudes</p></div></td></tr>';return;}
   tbody.innerHTML=DB.vacations.map(v=>`<tr><td><div class="emp-row"><div class="emp-avatar" style="background:${getColor(v.empName||'X')};width:28px;height:28px;font-size:10px;">${initials(v.empName||'?')}</div><div class="emp-name">${v.empName}</div></div></td><td>${vacTypeBadge(v.type)}</td><td style="font-family:var(--mono);font-size:12px">${v.start}</td><td style="font-family:var(--mono);font-size:12px">${v.end}</td><td style="font-family:var(--mono);font-size:12px">${v.days}d</td><td style="color:var(--text3);font-size:12px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${v.reason||'—'}</td><td>${vacStatusBadge(v.status)}</td><td>${v.status==='Pendiente'?`<div style="display:flex;gap:6px;"><button class="btn btn-success" onclick="approveVac(${v.id})" style="padding:3px 10px;font-size:11px;">✓</button><button class="btn btn-danger" onclick="rejectVac(${v.id})" style="padding:3px 10px;font-size:11px;">✕</button></div>`:`<button class="btn btn-ghost" onclick="deleteVac(${v.id})" style="padding:3px 10px;font-size:11px;color:var(--red)">✕</button>`}</td></tr>`).join('');
@@ -1262,153 +1230,59 @@ window.approveVac=id=>{const v=DB.vacations.find(x=>x.id===id);if(!v) return;v.s
 window.rejectVac=id=>{const v=DB.vacations.find(x=>x.id===id);if(!v) return;v.status='Rechazada';fbSave(COLS.vacations,v);renderVacations();toast(`Rechazada para ${v.empName}`,'warn');};
 window.deleteVac=id=>{if(!confirm('¿Eliminar?')) return;const v=DB.vacations.find(x=>x.id===id);if(!v) return;DB.vacations=DB.vacations.filter(x=>x.id!==id);fbDelete(COLS.vacations,v);renderVacations();toast('Eliminada','info');};
 
-// ── KPIs — 100% DINÁMICO, CERO DATOS FICTICIOS ───────────────
+// ── KPIs ───────────────────────────────────────────────────────
 function renderKPIs(){
-  const emps=DB.employees,total=emps.length;
-  const active=emps.filter(e=>e.status==='Activo').length;
+  const emps=DB.employees,total=emps.length,active=emps.filter(e=>e.status==='Activo').length;
   const totalSalary=emps.reduce((s,e)=>s+(e.salary||0),0);
   const avgScore=DB.evals.length?Math.round(DB.evals.reduce((s,e)=>s+e.score,0)/DB.evals.length*10)/10:null;
-
-  // KPI cards
-  document.getElementById('kpi-total').textContent=total;
-  document.getElementById('kpi-total-sub').textContent=total===1?'1 empleado registrado':`${total} empleados registrados`;
-  document.getElementById('kpi-actividad').textContent=total?Math.round(active/total*100)+'%':'0%';
-  document.getElementById('kpi-actividad-sub').textContent=`${active} activos de ${total}`;
-  document.getElementById('kpi-masa').textContent=fmtCurrency(totalSalary);
-  document.getElementById('kpi-masa-sub').textContent=total?`Prom. ${fmtCurrency(Math.round(totalSalary/total))}/emp.`:'Sin datos';
-  document.getElementById('kpi-score').textContent=avgScore!==null?avgScore+'/10':'—';
-  document.getElementById('kpi-score-sub').textContent=DB.evals.length?`${DB.evals.length} evaluaciones`:'Sin evaluaciones aún';
-
+  document.getElementById('kpi-total').textContent=total;document.getElementById('kpi-total-sub').textContent=total===1?'1 empleado registrado':`${total} empleados registrados`;
+  document.getElementById('kpi-actividad').textContent=total?Math.round(active/total*100)+'%':'0%';document.getElementById('kpi-actividad-sub').textContent=`${active} activos de ${total}`;
+  // Masa salarial — ocultar si modo privacidad
+  const kpiMasaCard=document.getElementById('kpi-masa-card');
+  if(kpiMasaCard) kpiMasaCard.style.display=window.privacyMode?'none':'';
+  if(!window.privacyMode){
+    document.getElementById('kpi-masa').textContent=fmtCurrency(totalSalary);
+    document.getElementById('kpi-masa-sub').textContent=total?`Prom. ${fmtCurrency(Math.round(totalSalary/total))}/emp.`:'Sin datos';
+  }
+  document.getElementById('kpi-score').textContent=avgScore!==null?avgScore+'/10':'—';document.getElementById('kpi-score-sub').textContent=DB.evals.length?`${DB.evals.length} evaluaciones`:'Sin evaluaciones aún';
   const empty=(id,msg)=>{document.getElementById(id).innerHTML=`<div class="empty-state" style="padding:24px"><p>${msg}</p></div>`;};
-
-  // 1. Empleados por departamento
   const depts=getDepts();
   if(!depts.length||!total){empty('kpi-dept-bars','Agrega empleados y departamentos para ver la distribución');}
-  else{
-    const maxC=Math.max(1,...depts.map(d=>emps.filter(e=>e.dept===d).length));
-    document.getElementById('kpi-dept-bars').innerHTML=depts.map((d,i)=>{
-      const c=emps.filter(e=>e.dept===d).length;
-      const pct=c?Math.round(c/maxC*100):0;
-      const col=PALETA[i%PALETA.length];
-      return `<div class="bar-row">
-        <div class="bar-label" title="${d}">${d}</div>
-        <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${col}"></div></div>
-        <div class="bar-val">${c}</div>
-      </div>`;
-    }).join('');
+  else{const maxC=Math.max(1,...depts.map(d=>emps.filter(e=>e.dept===d).length));document.getElementById('kpi-dept-bars').innerHTML=depts.map((d,i)=>{const c=emps.filter(e=>e.dept===d).length;const pct=c?Math.round(c/maxC*100):0;const col=PALETA[i%PALETA.length];return `<div class="bar-row"><div class="bar-label" title="${d}">${d}</div><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${col}"></div></div><div class="bar-val">${c}</div></div>`;}).join('');}
+  // Distribución salarial — ocultar si modo privacidad
+  const kpiSalaryDeptCard=document.getElementById('kpi-salary-dept-card');
+  if(kpiSalaryDeptCard) kpiSalaryDeptCard.style.display=window.privacyMode?'none':'';
+  if(!window.privacyMode){
+    if(!depts.length||!total){empty('kpi-salary-dept','Agrega empleados con salario para ver este análisis');}
+    else{const deptAvgSalary=depts.map((d,i)=>{const de=emps.filter(e=>e.dept===d);const avg=de.length?Math.round(de.reduce((s,e)=>s+(e.salary||0),0)/de.length):0;return {name:d,avg,count:de.length,color:PALETA[i%PALETA.length]};}).filter(d=>d.count>0).sort((a,b)=>b.avg-a.avg);if(!deptAvgSalary.length){empty('kpi-salary-dept','Sin datos salariales');}else{const maxAvg=Math.max(1,...deptAvgSalary.map(d=>d.avg));document.getElementById('kpi-salary-dept').innerHTML=deptAvgSalary.map(d=>`<div class="bar-row"><div class="bar-label" title="${d.name}">${d.name}</div><div class="bar-track"><div class="bar-fill" style="width:${Math.round(d.avg/maxAvg*100)}%;background:${d.color}"></div></div><div style="font-size:11px;color:var(--text3);font-family:var(--mono);width:70px;text-align:right;white-space:nowrap">${fmtCurrency(d.avg)}</div></div>`).join('');}}
   }
-
-  // 2. Salario promedio por departamento
-  if(!depts.length||!total){empty('kpi-salary-dept','Agrega empleados con salario para ver este análisis');}
-  else{
-    const deptAvgSalary=depts.map((d,i)=>{
-      const de=emps.filter(e=>e.dept===d);
-      const avg=de.length?Math.round(de.reduce((s,e)=>s+(e.salary||0),0)/de.length):0;
-      return {name:d,avg,count:de.length,color:PALETA[i%PALETA.length]};
-    }).filter(d=>d.count>0).sort((a,b)=>b.avg-a.avg);
-    if(!deptAvgSalary.length){empty('kpi-salary-dept','Sin datos salariales');}
-    else{
-      const maxAvg=Math.max(1,...deptAvgSalary.map(d=>d.avg));
-      document.getElementById('kpi-salary-dept').innerHTML=deptAvgSalary.map(d=>`
-        <div class="bar-row">
-          <div class="bar-label" title="${d.name}">${d.name}</div>
-          <div class="bar-track"><div class="bar-fill" style="width:${Math.round(d.avg/maxAvg*100)}%;background:${d.color}"></div></div>
-          <div style="font-size:11px;color:var(--text3);font-family:var(--mono);width:70px;text-align:right;white-space:nowrap">${fmtCurrency(d.avg)}</div>
-        </div>`).join('');
-    }
-  }
-
-  // 3. Estado de la plantilla
   if(!total){empty('kpi-status-breakdown','Sin empleados registrados');}
-  else{
-    const statuses=[{s:'Activo',c:'var(--green)'},{s:'En prueba',c:'var(--amber)'},{s:'Vacaciones',c:'var(--accent)'},{s:'Baja médica',c:'var(--red)'}];
-    document.getElementById('kpi-status-breakdown').innerHTML=statuses.map(st=>{
-      const c=emps.filter(e=>e.status===st.s).length;
-      const pct=Math.round(c/total*100);
-      return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
-        <div style="width:10px;height:10px;border-radius:50%;background:${st.c};flex-shrink:0;"></div>
-        <div style="flex:1;font-size:13px;">${st.s}</div>
-        <div style="font-family:var(--mono);font-size:13px;font-weight:600;color:${st.c};">${c}</div>
-        <div style="font-size:11px;color:var(--text3);width:32px;text-align:right;">${pct}%</div>
-      </div>
-      <div class="progress" style="margin-bottom:12px;margin-top:-8px;"><div class="progress-fill" style="width:${pct}%;background:${st.c}"></div></div>`;
-    }).join('');
-  }
-
-  // 4. Embudo de reclutamiento
-  const stages=['Screening','1ª Entrevista','Prueba técnica','Entrevista final','Ofertado'];
-  const stageCols=['#8b90a0','#fbbf24','#5b8def','#a78bfa','#34d399'];
-  const cands=DB.candidates;
+  else{const statuses=[{s:'Activo',c:'var(--green)'},{s:'En prueba',c:'var(--amber)'},{s:'Vacaciones',c:'var(--accent)'},{s:'Baja médica',c:'var(--red)'}];document.getElementById('kpi-status-breakdown').innerHTML=statuses.map(st=>{const c=emps.filter(e=>e.status===st.s).length;const pct=Math.round(c/total*100);return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;"><div style="width:10px;height:10px;border-radius:50%;background:${st.c};flex-shrink:0;"></div><div style="flex:1;font-size:13px;">${st.s}</div><div style="font-family:var(--mono);font-size:13px;font-weight:600;color:${st.c};">${c}</div><div style="font-size:11px;color:var(--text3);width:32px;text-align:right;">${pct}%</div></div><div class="progress" style="margin-bottom:12px;margin-top:-8px;"><div class="progress-fill" style="width:${pct}%;background:${st.c}"></div></div>`;}).join('');}
+  const stages=['Screening','1ª Entrevista','Prueba técnica','Entrevista final','Ofertado'],stageCols=['#8b90a0','#fbbf24','#5b8def','#a78bfa','#34d399'],cands=DB.candidates;
   if(!cands.length){empty('kpi-recruitment-funnel','Sin candidatos en proceso');}
-  else{
-    const maxS=Math.max(1,...stages.map(s=>cands.filter(c=>c.stage===s).length));
-    document.getElementById('kpi-recruitment-funnel').innerHTML=stages.map((s,i)=>{
-      const c=cands.filter(x=>x.stage===s).length;
-      return `<div class="bar-row">
-        <div class="bar-label">${s}</div>
-        <div class="bar-track"><div class="bar-fill" style="width:${c?Math.round(c/maxS*100):0}%;background:${stageCols[i]}"></div></div>
-        <div class="bar-val">${c}</div>
-      </div>`;
-    }).join('')+`<div style="margin-top:10px;font-size:11px;color:var(--text3);">Total candidatos: ${cands.length} · Rechazados: ${cands.filter(c=>c.stage==='Rechazado').length}</div>`;
-  }
-
-  // 5. Solicitudes de ausencia
+  else{const maxS=Math.max(1,...stages.map(s=>cands.filter(c=>c.stage===s).length));document.getElementById('kpi-recruitment-funnel').innerHTML=stages.map((s,i)=>{const c=cands.filter(x=>x.stage===s).length;return `<div class="bar-row"><div class="bar-label">${s}</div><div class="bar-track"><div class="bar-fill" style="width:${c?Math.round(c/maxS*100):0}%;background:${stageCols[i]}"></div></div><div class="bar-val">${c}</div></div>`;}).join('')+`<div style="margin-top:10px;font-size:11px;color:var(--text3);">Total candidatos: ${cands.length} · Rechazados: ${cands.filter(c=>c.stage==='Rechazado').length}</div>`;}
   const vacs=DB.vacations;
   if(!vacs.length){empty('kpi-vacation-status','Sin solicitudes de ausencia registradas');}
-  else{
-    const statVac=[{s:'Pendiente',c:'var(--amber)'},{s:'Aprobada',c:'var(--green)'},{s:'Rechazada',c:'var(--red)'}];
-    const tipos=['Vacaciones','Permiso','Baja médica','Asuntos propios'];
-    const tCols=['var(--accent)','var(--amber)','var(--red)','var(--teal)'];
-    document.getElementById('kpi-vacation-status').innerHTML=
-      statVac.map(st=>{const c=vacs.filter(v=>v.status===st.s).length;return `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);"><div style="display:flex;align-items:center;gap:8px;"><div style="width:8px;height:8px;border-radius:50%;background:${st.c};"></div><span style="font-size:13px;">${st.s}</span></div><span style="font-family:var(--mono);font-size:13px;font-weight:600;color:${st.c};">${c}</span></div>`;}).join('')+
-      `<div style="margin-top:12px;font-size:11px;color:var(--text3);font-weight:500;margin-bottom:6px;">POR TIPO</div>`+
-      tipos.map((t,i)=>{const c=vacs.filter(v=>v.type===t).length;if(!c) return '';return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;"><div style="width:6px;height:6px;border-radius:50%;background:${tCols[i]};"></div><span style="font-size:12px;color:var(--text2);flex:1;">${t}</span><span style="font-size:12px;font-family:var(--mono);">${c}</span></div>`;}).join('');
-  }
-
-  // 6. Top 5 salarios
-  const top5=[...emps].sort((a,b)=>b.salary-a.salary).slice(0,5);
-  if(!top5.length){empty('kpi-top-salaries','Sin empleados registrados');}
-  else{document.getElementById('kpi-top-salaries').innerHTML=top5.map((e,i)=>`<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);">
-    <div style="font-size:13px;color:var(--text3);font-family:var(--mono);width:18px;">${i+1}</div>
-    <div class="emp-avatar" style="background:${getColor(e.name)};font-size:10px;width:28px;height:28px;">${initials(e.name)}</div>
-    <div style="flex:1;"><div style="font-size:13px;font-weight:500;">${e.name}</div><div style="font-size:11px;color:var(--text3);">${e.dept} · ${e.role}</div></div>
-    <div style="font-family:var(--mono);font-size:13px;font-weight:600;color:var(--green);">${fmtCurrency(e.salary)}</div>
-  </div>`).join('');}
-
-  // 7. Evaluaciones de desempeño
+  else{const statVac=[{s:'Pendiente',c:'var(--amber)'},{s:'Aprobada',c:'var(--green)'},{s:'Rechazada',c:'var(--red)'}];const tipos=['Vacaciones','Permiso','Baja médica','Asuntos propios'],tCols=['var(--accent)','var(--amber)','var(--red)','var(--teal)'];document.getElementById('kpi-vacation-status').innerHTML=statVac.map(st=>{const c=vacs.filter(v=>v.status===st.s).length;return `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);"><div style="display:flex;align-items:center;gap:8px;"><div style="width:8px;height:8px;border-radius:50%;background:${st.c};"></div><span style="font-size:13px;">${st.s}</span></div><span style="font-family:var(--mono);font-size:13px;font-weight:600;color:${st.c};">${c}</span></div>`;}).join('')+`<div style="margin-top:12px;font-size:11px;color:var(--text3);font-weight:500;margin-bottom:6px;">POR TIPO</div>`+tipos.map((t,i)=>{const c=vacs.filter(v=>v.type===t).length;if(!c) return '';return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;"><div style="width:6px;height:6px;border-radius:50%;background:${tCols[i]};"></div><span style="font-size:12px;color:var(--text2);flex:1;">${t}</span><span style="font-size:12px;font-family:var(--mono);">${c}</span></div>`;}).join('');}
+  // Top 5 salarios — ocultar si modo privacidad
+  const kpiTopSalariesCard=document.getElementById('kpi-top-salaries-card');
+  if(kpiTopSalariesCard) kpiTopSalariesCard.style.display=window.privacyMode?'none':'';
+  if(!window.privacyMode){const top5=[...emps].sort((a,b)=>b.salary-a.salary).slice(0,5);if(!top5.length){empty('kpi-top-salaries','Sin empleados registrados');}else{document.getElementById('kpi-top-salaries').innerHTML=top5.map((e,i)=>`<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);"><div style="font-size:13px;color:var(--text3);font-family:var(--mono);width:18px;">${i+1}</div><div class="emp-avatar" style="background:${getColor(e.name)};font-size:10px;width:28px;height:28px;">${initials(e.name)}</div><div style="flex:1;"><div style="font-size:13px;font-weight:500;">${e.name}</div><div style="font-size:11px;color:var(--text3);">${e.dept} · ${e.role}</div></div><div style="font-family:var(--mono);font-size:13px;font-weight:600;color:var(--green);">${fmtCurrency(e.salary)}</div></div>`).join('');}}
   if(!DB.evals.length){empty('kpi-evals-summary','Sin evaluaciones registradas aún');}
-  else{
-    const avgG=DB.evals.length?Math.round(DB.evals.reduce((s,e)=>s+(e.goals||0),0)/DB.evals.length):0;
-    const topEvals=[...DB.evals].sort((a,b)=>b.score-a.score).slice(0,4);
-    document.getElementById('kpi-evals-summary').innerHTML=
-      `<div style="display:flex;gap:16px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border);">
-        <div style="text-align:center;flex:1;"><div style="font-size:22px;font-weight:600;color:var(--accent);">${avgScore}/10</div><div style="font-size:11px;color:var(--text3);">Score promedio</div></div>
-        <div style="text-align:center;flex:1;"><div style="font-size:22px;font-weight:600;color:var(--green);">${avgG}%</div><div style="font-size:11px;color:var(--text3);">Objetivos prom.</div></div>
-        <div style="text-align:center;flex:1;"><div style="font-size:22px;font-weight:600;color:var(--purple);">${DB.evals.length}</div><div style="font-size:11px;color:var(--text3);">Evaluaciones</div></div>
-      </div>`+
-      topEvals.map(ev=>{const color=ev.score>=8?'var(--green)':ev.score>=6?'var(--amber)':'var(--red)';return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-        <div class="emp-avatar" style="background:${getColor(ev.empName)};font-size:10px;width:26px;height:26px;">${initials(ev.empName)}</div>
-        <div style="flex:1;font-size:12px;"><div style="font-weight:500;">${ev.empName}</div><div style="color:var(--text3);">${ev.period||'—'}</div></div>
-        <div style="font-family:var(--mono);font-size:14px;font-weight:600;color:${color};">${ev.score}/10</div>
-      </div>`;}).join('');
-  }
+  else{const avgG=DB.evals.length?Math.round(DB.evals.reduce((s,e)=>s+(e.goals||0),0)/DB.evals.length):0;const topEvals=[...DB.evals].sort((a,b)=>b.score-a.score).slice(0,4);document.getElementById('kpi-evals-summary').innerHTML=`<div style="display:flex;gap:16px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border);"><div style="text-align:center;flex:1;"><div style="font-size:22px;font-weight:600;color:var(--accent);">${avgScore}/10</div><div style="font-size:11px;color:var(--text3);">Score promedio</div></div><div style="text-align:center;flex:1;"><div style="font-size:22px;font-weight:600;color:var(--green);">${avgG}%</div><div style="font-size:11px;color:var(--text3);">Objetivos prom.</div></div><div style="text-align:center;flex:1;"><div style="font-size:22px;font-weight:600;color:var(--purple);">${DB.evals.length}</div><div style="font-size:11px;color:var(--text3);">Evaluaciones</div></div></div>`+topEvals.map(ev=>{const color=ev.score>=8?'var(--green)':ev.score>=6?'var(--amber)':'var(--red)';return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;"><div class="emp-avatar" style="background:${getColor(ev.empName)};font-size:10px;width:26px;height:26px;">${initials(ev.empName)}</div><div style="flex:1;font-size:12px;"><div style="font-weight:500;">${ev.empName}</div><div style="color:var(--text3);">${ev.period||'—'}</div></div><div style="font-family:var(--mono);font-size:14px;font-weight:600;color:${color};">${ev.score}/10</div></div>`;}).join('');}
 }
 
 window.exportKPI=()=>{
   const emps=DB.employees;
-  const lines=['═══ INFORME KPIs RRHH ═══','Fecha: '+new Date().toLocaleDateString('es-GT'),'','── PERSONAL ──','Total empleados: '+emps.length,'Activos: '+emps.filter(e=>e.status==='Activo').length,'En prueba: '+emps.filter(e=>e.status==='En prueba').length,'En vacaciones: '+emps.filter(e=>e.status==='Vacaciones').length,'Baja médica: '+emps.filter(e=>e.status==='Baja médica').length,'','── NÓMINA ──','Masa salarial total: '+fmtCurrency(emps.reduce((s,e)=>s+(e.salary||0),0)),'Salario promedio: '+fmtCurrency(emps.length?Math.round(emps.reduce((s,e)=>s+(e.salary||0),0)/emps.length):0),'','── POR DEPARTAMENTO ──',...getDepts().map(d=>`${d}: ${emps.filter(e=>e.dept===d).length} empleados`),'','── RECLUTAMIENTO ──','Vacantes abiertas: '+DB.vacancies.filter(v=>v.status!=='Cerrada').length,'Candidatos activos: '+DB.candidates.length,'','── VACACIONES ──','Pendientes: '+DB.vacations.filter(v=>v.status==='Pendiente').length,'Aprobadas: '+DB.vacations.filter(v=>v.status==='Aprobada').length,'Rechazadas: '+DB.vacations.filter(v=>v.status==='Rechazada').length,'','── EVALUACIONES ──','Total evaluaciones: '+DB.evals.length,'Score promedio: '+(DB.evals.length?Math.round(DB.evals.reduce((s,e)=>s+e.score,0)/DB.evals.length*10)/10+'/10':'—')];
-  downloadFile(lines.join('\n'),'kpis_'+new Date().toISOString().split('T')[0]+'.txt','text/plain');
-  toast('✓ Informe KPI exportado','success');
+  const masaSal=window.privacyMode?'[CONFIDENCIAL]':fmtCurrency(emps.reduce((s,e)=>s+(e.salary||0),0));
+  const promSal=window.privacyMode?'[CONFIDENCIAL]':fmtCurrency(emps.length?Math.round(emps.reduce((s,e)=>s+(e.salary||0),0)/emps.length):0);
+  const lines=['═══ INFORME KPIs RRHH ═══','Fecha: '+new Date().toLocaleDateString('es-GT'),'','── PERSONAL ──','Total empleados: '+emps.length,'Activos: '+emps.filter(e=>e.status==='Activo').length,'En prueba: '+emps.filter(e=>e.status==='En prueba').length,'En vacaciones: '+emps.filter(e=>e.status==='Vacaciones').length,'Baja médica: '+emps.filter(e=>e.status==='Baja médica').length,'','── NÓMINA ──','Masa salarial total: '+masaSal,'Salario promedio: '+promSal,'','── POR DEPARTAMENTO ──',...getDepts().map(d=>`${d}: ${emps.filter(e=>e.dept===d).length} empleados`),'','── RECLUTAMIENTO ──','Vacantes abiertas: '+DB.vacancies.filter(v=>v.status!=='Cerrada').length,'Candidatos activos: '+DB.candidates.length,'','── VACACIONES ──','Pendientes: '+DB.vacations.filter(v=>v.status==='Pendiente').length,'Aprobadas: '+DB.vacations.filter(v=>v.status==='Aprobada').length,'Rechazadas: '+DB.vacations.filter(v=>v.status==='Rechazada').length,'','── EVALUACIONES ──','Total evaluaciones: '+DB.evals.length,'Score promedio: '+(DB.evals.length?Math.round(DB.evals.reduce((s,e)=>s+e.score,0)/DB.evals.length*10)/10+'/10':'—')];
+  downloadFile(lines.join('\n'),'kpis_'+new Date().toISOString().split('T')[0]+'.txt','text/plain');toast('✓ Informe KPI exportado','success');
 };
 
 // ── EVALUATIONS ───────────────────────────────────────────────
 function renderEvals(){
-  const evs=DB.evals;
-  document.getElementById('ev-total').textContent=evs.length;
-  const avg=evs.length?Math.round(evs.reduce((s,e)=>s+e.score,0)/evs.length*10)/10:0;
-  document.getElementById('ev-avg').textContent=evs.length?avg+'/10':'—';
-  document.getElementById('ev-goals').textContent=evs.length?Math.round(evs.reduce((s,e)=>s+(e.goals||0),0)/evs.length)+'%':'—';
-  document.getElementById('ev-emp-count').textContent=new Set(evs.map(e=>e.empId)).size;
+  const evs=DB.evals;document.getElementById('ev-total').textContent=evs.length;const avg=evs.length?Math.round(evs.reduce((s,e)=>s+e.score,0)/evs.length*10)/10:0;document.getElementById('ev-avg').textContent=evs.length?avg+'/10':'—';document.getElementById('ev-goals').textContent=evs.length?Math.round(evs.reduce((s,e)=>s+(e.goals||0),0)/evs.length)+'%':'—';document.getElementById('ev-emp-count').textContent=new Set(evs.map(e=>e.empId)).size;
   const tbody=document.getElementById('evals-tbody');
   if(!evs.length){tbody.innerHTML='<tr><td colspan="7"><div class="empty-state" style="padding:30px"><p>Sin evaluaciones.</p></div></td></tr>';return;}
   tbody.innerHTML=evs.map(ev=>{const score=ev.score||0,color=score>=8?'var(--green)':score>=6?'var(--amber)':'var(--red)';return `<tr><td><div class="emp-row"><div class="emp-avatar" style="background:${getColor(ev.empName)};font-size:10px;width:28px;height:28px;">${initials(ev.empName)}</div><div class="emp-name">${ev.empName}</div></div></td><td style="color:var(--text2);font-size:12px">${ev.empDept||'—'}</td><td style="font-family:var(--mono);font-size:12px">${ev.period||'—'}</td><td><span style="font-size:16px;font-weight:600;color:${color};font-family:var(--mono)">${score}</span><span style="font-size:11px;color:var(--text3)">/10</span></td><td><div style="display:flex;align-items:center;gap:8px;"><div class="progress" style="width:70px"><div class="progress-fill" style="width:${ev.goals||0}%;background:var(--accent)"></div></div><span style="font-size:11px;font-family:var(--mono)">${ev.goals||0}%</span></div></td><td style="font-size:12px;color:var(--text2);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${ev.comments||'—'}</td><td><button class="btn btn-ghost" onclick="deleteEval(${ev.id})" style="padding:3px 8px;font-size:11px;color:var(--red)">✕</button></td></tr>`;}).join('');
@@ -1428,13 +1302,10 @@ window.deleteAnnounce=id=>{if(!confirm('¿Eliminar?')) return;const a=DB.announc
 
 // ── COURSES ───────────────────────────────────────────────────
 function renderCourses(){
-  document.getElementById('fo-total').textContent=DB.courses.length;
-  document.getElementById('fo-done').textContent=DB.courses.filter(c=>c.progress>=100).length;
-  document.getElementById('fo-hours').textContent=DB.courses.reduce((s,c)=>s+(c.hours||0),0)+'h';
+  document.getElementById('fo-total').textContent=DB.courses.length;document.getElementById('fo-done').textContent=DB.courses.filter(c=>c.progress>=100).length;document.getElementById('fo-hours').textContent=DB.courses.reduce((s,c)=>s+(c.hours||0),0)+'h';
   const grid=document.getElementById('courses-grid');
   if(!DB.courses.length){grid.innerHTML='<div class="empty-state" style="padding:30px"><p>Sin cursos.</p></div>';return;}
-  const catColors={Tecnología:'badge-blue',Liderazgo:'badge-green',Compliance:'badge-amber','Soft Skills':'badge-purple',Ventas:'badge-teal',Seguridad:'badge-red'};
-  const progColors={Tecnología:'var(--accent)',Liderazgo:'var(--green)',Compliance:'var(--amber)','Soft Skills':'var(--purple)',Ventas:'var(--teal)',Seguridad:'var(--red)'};
+  const catColors={Tecnología:'badge-blue',Liderazgo:'badge-green',Compliance:'badge-amber','Soft Skills':'badge-purple',Ventas:'badge-teal',Seguridad:'badge-red'};const progColors={Tecnología:'var(--accent)',Liderazgo:'var(--green)',Compliance:'var(--amber)','Soft Skills':'var(--purple)',Ventas:'var(--teal)',Seguridad:'var(--red)'};
   grid.innerHTML=DB.courses.map(c=>`<div class="course-card"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;"><span class="badge ${catColors[c.cat]||'badge-blue'}">${c.cat}</span><div style="display:flex;align-items:center;gap:6px;"><span style="font-size:11px;color:var(--text3);font-family:var(--mono)">${c.hours}h</span><button onclick="deleteCourse(${c.id})" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:12px;">✕</button></div></div><div class="course-title">${c.title}</div><div class="course-meta">${c.instructor} · ${c.modality}</div><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;"><span style="font-size:12px;color:var(--text3)">Progreso</span><span style="font-size:12px;font-family:var(--mono);color:${progColors[c.cat]||'var(--accent)'}">${c.progress}%</span></div><div class="progress"><div class="progress-fill" style="width:${c.progress}%;background:${progColors[c.cat]||'var(--accent)'}"></div></div><div style="display:flex;gap:6px;margin-top:10px;"><button class="btn btn-ghost" onclick="updateProgress(${c.id})" style="padding:3px 10px;font-size:11px;flex:1">Actualizar %</button></div></div>`).join('');
 }
 window.submitCourse=e=>{e.preventDefault();const c={id:nextId(DB.courses),title:document.getElementById('co-title').value.trim(),cat:document.getElementById('co-cat').value,hours:parseFloat(document.getElementById('co-hours').value)||8,instructor:document.getElementById('co-instructor').value.trim()||'Interno',modality:document.getElementById('co-modality').value,desc:document.getElementById('co-desc').value.trim(),progress:0};DB.courses.push(c);fbSave(COLS.courses,c);addActivity(`Nuevo curso: "${c.title}"`,'course');closeAllModals();document.getElementById('form-course').reset();renderCourses();toast(`✓ Curso "${c.title}" creado`,'success');};
@@ -1474,7 +1345,9 @@ window.initApp=()=>{
   const footer=document.getElementById('admin-danger-section');
   if(window.currentRole==='Admin RRHH'){footer.innerHTML=`<div class="nav-item danger" onclick="showResetModal()" style="margin-bottom:6px;"><svg viewBox="0 0 16 16" fill="none" style="width:15px;height:15px;opacity:0.7;"><path d="M3 5h10M6 5V3h4v2M6 8v4M10 8v4M4 5l1 8h6l1-8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>Eliminar todos los datos</div>`;}
   else{footer.innerHTML='';}
-  populateAllDeptSelects();updateDeptFilters();renderPage('dashboard');updateBadges();
+  populateAllDeptSelects();updateDeptFilters();
+  applyPrivacyMode();
+  renderPage('dashboard');updateBadges();
 };
 
 document.addEventListener('click',e=>{if(!e.target.closest('#global-search')&&!e.target.closest('#search-results')) document.getElementById('search-results').style.display='none';});
