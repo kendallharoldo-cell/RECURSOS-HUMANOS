@@ -358,6 +358,7 @@
   <div class="modal-footer">
     <button class="btn btn-danger" onclick="deleteEmployee()">Eliminar</button>
     <div style="flex:1"></div>
+    <button class="btn btn-danger" id="terminate-emp-btn" onclick="openTerminateModal()" style="background:var(--red); color:white;">Dar de Baja</button>
     <button class="btn btn-ghost" onclick="closeAllModals()">Cerrar</button>
     <button class="btn btn-primary" id="save-emp-btn" onclick="document.getElementById('form-emp-edit').requestSubmit()" style="display:none;">Guardar cambios</button>
   </div>
@@ -546,6 +547,26 @@
   </div>
 </div>
 
+<!-- MODAL: Procesar Baja -->
+<div id="modal-emp-terminate" class="modal-wrap" style="display:none;width:min(95vw,420px);">
+  <div class="modal-header"><h3>Procesar baja de empleado</h3><button class="close-btn" onclick="closeAllModals()">×</button></div>
+  <div class="modal-body">
+    <input type="hidden" id="term-id">
+    <div class="form-group">
+      <label>Fecha de salida</label>
+      <input type="date" id="term-date">
+    </div>
+    <div class="form-group">
+      <label>Motivo de la baja</label>
+      <select id="term-reason"><option>Renuncia voluntaria</option><option>Despido</option><option>Fin de contrato</option><option>Jubilación</option><option>Otro</option></select>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-ghost" onclick="closeAllModals()">Cancelar</button>
+    <button class="btn btn-danger" onclick="executeTermination()">Confirmar Baja</button>
+  </div>
+</div>
+
 <!-- MODAL: Reset -->
 <div id="modal-reset-confirm" class="modal-wrap" style="display:none;width:min(95vw,420px);">
   <div class="modal-header"><h3 style="color:var(--red);">⚠️ Zona de peligro</h3><button class="close-btn" onclick="closeAllModals()">×</button></div>
@@ -587,6 +608,7 @@
   <div class="sidebar-section">
     <div class="sidebar-label">Análisis</div>
     <div class="nav-item" onclick="nav('kpis',this)"><svg viewBox="0 0 16 16" fill="none"><path d="M2 12l3-4 3 2 3-5 3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 14h12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>KPIs y Analítica</div>
+    <div class="nav-item" onclick="nav('rotacion',this)"><svg viewBox="0 0 16 16" fill="none"><path d="M8 2v3M3.5 4.5l2 2M2 11h3M4.5 14.5l2-2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="10" cy="10" r="4" stroke="currentColor" stroke-width="1.3"/></svg>Rotación</div>
     <div class="nav-item" onclick="nav('evaluaciones',this)"><svg viewBox="0 0 16 16" fill="none"><rect x="3" y="2" width="10" height="12" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M6 6h4M6 9h2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>Evaluaciones</div>
   </div>
   <div class="sidebar-section">
@@ -655,6 +677,40 @@
           <div style="display:flex;gap:10px;justify-content:center;" id="dash-status-legend"></div>
         </div>
         <div class="card"><div class="card-title">Alertas activas</div><div id="dash-alerts" style="display:flex;flex-direction:column;gap:8px;"></div></div>
+      </div>
+    </div>
+
+    <!-- ROTACIÓN DE PERSONAL -->
+    <div class="page" id="page-rotacion">
+      <!-- BUSCADOR PARA BAJAS -->
+      <div class="card" style="margin-bottom:20px;">
+        <div class="card-title">Procesar Nueva Baja <span style="text-transform:none; font-weight:normal; color:var(--text3)">Localiza un empleado para iniciar el proceso de salida</span></div>
+        <div class="search-box" style="width:100%; max-width:420px; margin-bottom:12px;">
+          <svg viewBox="0 0 16 16" fill="none"><circle cx="6.5" cy="6.5" r="4" stroke="currentColor" stroke-width="1.3"/><path d="M10 10l3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          <input type="text" id="rot-search-input" placeholder="Escribe el nombre del empleado..." oninput="searchEmployeeToTerminate(this.value)">
+        </div>
+        <div id="rot-search-results" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap:10px;"></div>
+      </div>
+
+      <div class="grid4" style="margin-bottom:20px;">
+        <div class="stat-card"><div class="stat-accent-bar" style="background:var(--red)"></div><div class="stat-label">Índice Rotación Mensual</div><div class="stat-value" id="rot-month-pct" style="color:var(--red)">0%</div><div class="stat-delta" id="rot-month-sub">Este mes</div></div>
+        <div class="stat-card"><div class="stat-accent-bar" style="background:var(--amber)"></div><div class="stat-label">Total Bajas Año</div><div class="stat-value" id="rot-year-total" style="color:var(--amber)">0</div><div class="stat-delta">Registros</div></div>
+        <div class="stat-card"><div class="stat-accent-bar" style="background:var(--accent)"></div><div class="stat-label">Promedio Permanencia</div><div class="stat-value" id="rot-avg-tenure" style="color:var(--accent)">—</div><div class="stat-delta">Meses</div></div>
+        <div class="stat-card"><div class="stat-accent-bar" style="background:var(--green)"></div><div class="stat-label">Tasa Retención</div><div class="stat-value" id="rot-retention" style="color:var(--green)">100%</div><div class="stat-delta">Anual</div></div>
+      </div>
+      <div class="grid2">
+        <div class="card">
+          <div class="card-title">Dashboard: Comparativa Mensual por Departamento
+            <button class="btn btn-ghost" onclick="clearTerminationHistory()" style="padding:4px 10px; font-size:10px; color:var(--red)">Limpiar Historial</button>
+          </div>
+          <div id="rot-dept-list"><div class="empty-state"><p>Sin datos de bajas registrados</p></div></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Historial de Bajas</div>
+          <div class="table-wrap">
+            <table><thead><tr><th>Empleado</th><th>Departamento</th><th>Fecha Baja</th><th>Motivo</th><th style="text-align:right">Acciones</th></tr></thead><tbody id="rot-history-tbody"></tbody></table>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -849,8 +905,8 @@ const firebaseConfig={apiKey:"AIzaSyDmtmWpJ8Iev2SGNnH0X8lHgugUcqVYTxQ",authDomai
 firebase.initializeApp(firebaseConfig);
 const db=firebase.firestore();
 
-const COLS={employees:'employees',vacations:'vacations',vacancies:'vacancies',evals:'evaluations',announces:'announcements',courses:'courses',candidates:'candidates',activity:'activity',orgNodes:'orgNodes',departments:'departments'};
-window.DB={employees:[],vacations:[],vacancies:[],evals:[],announces:[],courses:[],candidates:[],activity:[],orgNodes:[],departments:[]};
+const COLS={employees:'employees',vacations:'vacations',vacancies:'vacancies',evals:'evaluations',announces:'announcements',courses:'courses',candidates:'candidates',activity:'activity',orgNodes:'orgNodes',departments:'departments',terminations:'terminations'};
+window.DB={employees:[],vacations:[],vacancies:[],evals:[],announces:[],courses:[],candidates:[],activity:[],orgNodes:[],departments:[],terminations:[]};
 
 // ══════════════════════════════════════════════
 // SISTEMA DE PRIVACIDAD / MODO CANDADO
@@ -1006,7 +1062,7 @@ window.toast=(msg,type='info')=>{const tc=document.getElementById('toast-contain
 
 // ── NAV ───────────────────────────────────────────────────────
 const pageTitles={dashboard:'Dashboard',departamentos:'Departamentos',personal:'Gestión de personal',organigrama:'Organigrama',reclutamiento:'Reclutamiento y selección',nominas:'Nóminas y compensaciones',vacaciones:'Vacaciones y permisos',kpis:'KPIs y Analítica',evaluaciones:'Evaluaciones de desempeño',comunicacion:'Comunicación interna',formacion:'Formación y desarrollo'};
-const headerBtns={dashboard:'Nuevo empleado',departamentos:'Nuevo departamento',personal:'Añadir empleado',organigrama:'+ Nodo raíz',reclutamiento:'Nueva vacante',nominas:'Exportar nómina',vacaciones:'Nueva solicitud',kpis:'Exportar informe',evaluaciones:'Nueva evaluación',comunicacion:'Nuevo anuncio',formacion:'Nuevo curso'};
+const headerBtns={dashboard:'Nuevo empleado',departamentos:'Nuevo departamento',personal:'Añadir empleado',organigrama:'+ Nodo raíz',reclutamiento:'Nueva vacante',nominas:'Exportar nómina',vacaciones:'Nueva solicitud',kpis:'Exportar informe',evaluaciones:'Nueva evaluación',comunicacion:'Nuevo anuncio',formacion:'Nuevo curso',rotacion:'Exportar Bajas'};
 window.currentPage='dashboard';
 
 window.nav=(page,el)=>{
@@ -1032,13 +1088,14 @@ window.headerAction=()=>{
     evaluaciones:()=>{populateEmpDropdown('ev-emp');openModal('modal-eval-add');},
     comunicacion:()=>openModal('modal-announce-add'),
     formacion:()=>openModal('modal-course-add'),
-    organigrama:()=>openAddOrgNode(null)
+    organigrama:()=>openAddOrgNode(null),
+    rotacion:()=>toast('Exportando reporte de rotación...','info')
   };
   (a[window.currentPage]||a.dashboard)();
 };
 
 window.renderPage=page=>{
-  const r={dashboard:renderDashboard,departamentos:renderDepartamentos,personal:renderEmployees,organigrama:renderOrganigrama,reclutamiento:renderRecruitment,nominas:renderPayroll,vacaciones:renderVacations,kpis:renderKPIs,evaluaciones:renderEvals,comunicacion:renderComms,formacion:renderCourses};
+  const r={dashboard:renderDashboard,departamentos:renderDepartamentos,personal:renderEmployees,organigrama:renderOrganigrama,reclutamiento:renderRecruitment,nominas:renderPayroll,vacaciones:renderVacations,kpis:renderKPIs,evaluaciones:renderEvals,comunicacion:renderComms,formacion:renderCourses,rotacion:renderRotacion};
   if(r[page]) r[page]();updateBadges();applyPrivacyMode();
 };
 
@@ -1136,6 +1193,205 @@ window.deleteEmployee=()=>{
   const id=parseInt(document.getElementById('ee-id').value);const emp=DB.employees.find(x=>x.id===id);if(!emp) return;
   if(!confirm(`¿Eliminar a ${emp.name}?`)) return;
   DB.employees=DB.employees.filter(x=>x.id!==id);fbDelete(COLS.employees,emp);addActivity(`Empleado ${emp.name} eliminado`,'emp');closeAllModals();renderPage(window.currentPage);toast(`${emp.name} eliminado`,'warn');
+};
+
+window.openTerminateModal=()=>{
+  const id = parseInt(document.getElementById('ee-id').value);
+  const emp = DB.employees.find(x=>x.id===id);
+  if(!emp) return;
+  document.getElementById('term-date').value = new Date().toISOString().split('T')[0];
+  openModal('modal-emp-terminate');
+};
+
+window.executeTermination=()=>{
+  const id = parseInt(document.getElementById('ee-id').value);
+  const emp = DB.employees.find(x=>x.id===id);
+  const date = document.getElementById('term-date').value;
+  const reason = document.getElementById('term-reason').value;
+  
+  if(!date) return toast('Selecciona la fecha','error');
+  
+  const term = {
+    id: nextId(DB.terminations),
+    empId: emp.id,
+    empName: emp.name,
+    dept: emp.dept,
+    terminationDate: date,
+    joinDate: emp.joinDate,
+    reason: reason
+  };
+  
+  DB.terminations.push(term);
+  fbSave(COLS.terminations, term);
+  
+  // Remover de empleados activos
+  DB.employees = DB.employees.filter(x=>x.id!==id);
+  fbDelete(COLS.employees, emp);
+  
+  addActivity(`Baja procesada: ${emp.name}`,'emp');
+  closeAllModals();
+  renderPage(window.currentPage);
+  toast(`✓ Baja de ${emp.name} registrada`,'warn');
+};
+
+// ── ROTACIÓN ──────────────────────────────────────────────────
+const DEPT_UNIFIER = {
+  'Ventas': 'Área Comercial',
+  'Marketing': 'Área Comercial',
+  'Tecnología': 'Tech & Data',
+  'Analytics': 'Tech & Data'
+};
+const getGroupedDept = (d) => DEPT_UNIFIER[d] || d;
+
+function renderRotacion(){
+  const now = new Date();
+  const curMonth = now.toISOString().slice(0,7); // YYYY-MM
+  const termsMonth = DB.terminations.filter(t => t.terminationDate.startsWith(curMonth)).length;
+  const totalEmp = DB.employees.length || 1;
+  
+  const monthRate = Math.round((termsMonth / totalEmp) * 100);
+  document.getElementById('rot-month-pct').textContent = monthRate + '%';
+  document.getElementById('rot-month-sub').textContent = termsMonth + ' bajas este mes';
+  document.getElementById('rot-year-total').textContent = DB.terminations.length;
+  
+  // Promedio Permanencia
+  const tenures = DB.terminations.map(t => {
+    if(!t.joinDate || !t.terminationDate) return 0;
+    const diff = new Date(t.terminationDate) - new Date(t.joinDate);
+    return diff / (1000 * 60 * 60 * 24 * 30.44);
+  }).filter(v => v > 0);
+  const avgTenure = tenures.length ? Math.round(tenures.reduce((a,b)=>a+b,0)/tenures.length) : 0;
+  document.getElementById('rot-avg-tenure').textContent = avgTenure ? avgTenure + ' m' : '—';
+
+  // ── DASHBOARD COMPARATIVO MENSUAL ────────────────────────
+  const last6Months = [];
+  for(let i=5; i>=0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    last6Months.push({ key: d.toISOString().slice(0,7), label: d.toLocaleDateString('es-ES', { month: 'short' }) });
+  }
+
+  const allDeptsInSystem = [...new Set([
+    ...DB.employees.map(e => getGroupedDept(e.dept)),
+    ...DB.terminations.map(t => getGroupedDept(t.dept))
+  ])].sort();
+
+  const chartData = last6Months.map(m => {
+    const entry = { month: m.label, total: 0, depts: {} };
+    allDeptsInSystem.forEach(d => entry.depts[d] = 0);
+    DB.terminations.filter(t => t.terminationDate.startsWith(m.key)).forEach(t => {
+      const gd = getGroupedDept(t.dept);
+      entry.depts[gd]++;
+      entry.total++;
+    });
+    return entry;
+  });
+
+  const maxVal = Math.max(1, ...chartData.map(m => m.total));
+  const rotDeptList = document.getElementById('rot-dept-list');
+  
+  if(!DB.terminations.length) {
+    rotDeptList.innerHTML = '<div class="empty-state"><p>Sin datos históricos de bajas para generar la comparativa</p></div>';
+  } else {
+    rotDeptList.innerHTML = `
+      <div style="display:flex; height:180px; align-items:flex-end; gap:12px; padding:10px 10px 0; border-bottom:1px solid var(--border); margin-bottom:12px;">
+        ${chartData.map(m => {
+          const height = Math.round((m.total / maxVal) * 100);
+          return `
+            <div style="flex:1; height:100%; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; gap:8px;">
+              <div style="width:100%; max-width:32px; height:${height}%; background:var(--bg4); border-radius:3px 3px 0 0; display:flex; flex-direction:column-reverse; overflow:hidden; position:relative;" title="Total ${m.month}: ${m.total}">
+                ${allDeptsInSystem.map((d, i) => {
+                  const c = m.depts[d]; if(!c) return '';
+                  return `<div style="height:${(c/m.total)*100}%; background:${PALETA[i%PALETA.length]}; border-top:1px solid rgba(0,0,0,0.1);" title="${d}: ${c}"></div>`;
+                }).join('')}
+              </div>
+              <span style="font-size:10px; font-family:var(--mono); color:var(--text3); text-transform:uppercase;">${m.month}</span>
+            </div>`;
+        }).join('')}
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(110px, 1fr)); gap:8px;">
+        ${allDeptsInSystem.map((d, i) => `
+          <div style="display:flex; align-items:center; gap:6px; font-size:10px; color:var(--text2);">
+            <div style="width:8px; height:8px; border-radius:2px; background:${PALETA[i%PALETA.length]}"></div>
+            <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${d}">${d}</span>
+          </div>`).join('')}
+      </div>`;
+  }
+  
+  const tbody = document.getElementById('rot-history-tbody');
+  tbody.innerHTML = DB.terminations.sort((a,b)=> new Date(b.terminationDate) - new Date(a.terminationDate)).map(t => `
+    <tr>
+      <td>${t.empName}</td>
+      <td>${t.dept}</td>
+      <td style="font-family:var(--mono)">${t.terminationDate}</td>
+      <td><span class="badge badge-amber">${t.reason}</span></td>
+      <td style="text-align:right">
+        <button class="btn btn-ghost" style="padding:4px 8px; font-size:10px" onclick="openEditTermination(${t.id})">Editar</button>
+        <button class="btn btn-ghost" style="padding:4px 8px; font-size:10px; color:var(--red)" onclick="deleteTermination(${t.id})">Eliminar</button>
+      </td>
+    </tr>`).join('');
+}
+
+window.openEditTermination=(id)=>{
+  const term = DB.terminations.find(x => x.id === id);
+  if(!term) return;
+  document.getElementById('term-id').value = id;
+  document.getElementById('term-date').value = term.terminationDate;
+  document.getElementById('term-reason').value = term.reason;
+  document.querySelector('#modal-emp-terminate h3').textContent = 'Editar registro de baja';
+  document.querySelector('#modal-emp-terminate .btn-danger').textContent = 'Guardar Cambios';
+  openModal('modal-emp-terminate');
+};
+
+window.deleteTermination=(id)=>{
+  const term = DB.terminations.find(x => x.id === id);
+  if(!term || !confirm(`¿Eliminar el registro histórico de ${term.empName}?`)) return;
+  DB.terminations = DB.terminations.filter(x => x.id !== id);
+  fbDelete(COLS.terminations, term);
+  renderRotacion();
+  toast('Registro eliminado','warn');
+};
+
+window.clearTerminationHistory=async()=>{
+  if(!DB.terminations.length) return toast('El historial ya está vacío','info');
+  if(!confirm('¿Eliminar TODO el historial de bajas permanentemente?')) return;
+  showLoading('Limpiando historial...');
+  const snap = await db.collection(COLS.terminations).get();
+  const batch = db.batch();
+  snap.docs.forEach(d => batch.delete(d.ref));
+  if(snap.docs.length) await batch.commit();
+  DB.terminations = [];
+  hideLoading();
+  renderRotacion();
+  toast('Historial vaciado correctamente','success');
+};
+
+window.searchEmployeeToTerminate = (q) => {
+  const container = document.getElementById('rot-search-results');
+  if(!q || q.length < 2) { container.innerHTML = ''; return; }
+  const qL = q.toLowerCase();
+  const results = DB.employees.filter(e => e.name.toLowerCase().includes(qL) || e.dept.toLowerCase().includes(qL));
+  
+  if(!results.length) {
+    container.innerHTML = '<div style="font-size:12px;color:var(--text3);padding:8px;">No se encontraron empleados activos</div>';
+    return;
+  }
+  
+  container.innerHTML = results.slice(0, 4).map(e => `
+    <div style="background:var(--bg3); padding:10px; border-radius:10px; display:flex; align-items:center; gap:10px; border:1px solid var(--border);">
+      <div class="emp-avatar" style="background:${getColor(e.name)}; width:28px; height:28px; font-size:10px;">${initials(e.name)}</div>
+      <div style="flex:1; min-width:0;">
+        <div style="font-size:12px; font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${e.name}</div>
+        <div style="font-size:10px; color:var(--text3);">${e.dept}</div>
+      </div>
+      <button class="btn btn-danger" style="padding:4px 8px; font-size:10px" onclick="openTerminateFromRot(${e.id})">Baja</button>
+    </div>
+  `).join('');
+};
+
+window.openTerminateFromRot = (id) => {
+  document.getElementById('ee-id').value = id;
+  document.getElementById('term-id').value = '';
+  openTerminateModal();
 };
 
 // ── DEPARTAMENTOS ────────────────────────────────────────────
