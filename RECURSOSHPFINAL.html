@@ -85,6 +85,7 @@
   .grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
   .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
   .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+  .grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;}
   .card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;}
   .card-title{font-size:12px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;}
   .card-title a{color:var(--accent);font-size:11px;text-transform:none;letter-spacing:0;cursor:pointer;}
@@ -220,7 +221,7 @@
   .tab.active{background:var(--bg2);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,0.3);}
   /* Clase para enmascarar datos confidenciales */
   .salary-mask{filter:blur(5px);user-select:none;transition:filter 0.2s;pointer-events:none;}
-  @media(max-width:900px){.grid4{grid-template-columns:repeat(2,1fr)}.grid3{grid-template-columns:1fr 1fr}}
+  @media(max-width:900px){.grid4,.grid5{grid-template-columns:repeat(2,1fr)}.grid3{grid-template-columns:1fr 1fr}}
   @media(max-width:680px){#sidebar{display:none}.grid2,.grid3,.grid4{grid-template-columns:1fr}}
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -444,9 +445,9 @@
     <form id="form-eval" onsubmit="submitEval(event)">
       <div class="form-group"><label>Empleado <span style="color:var(--red)">*</span></label>
         <select id="ev-emp" required><option value="">Seleccionar empleado...</option></select></div>
-      <div class="grid2">
+      <div class="grid2"> 
         <div class="form-group"><label>Período</label><input type="text" id="ev-period" placeholder="Ej: Q2 2025"></div>
-        <div class="form-group"><label>Puntuación (1-10)</label><input type="number" id="ev-score" min="0" max="10" step="0.1" placeholder="7.5" required></div>
+        <div class="form-group"><label>Puntuación (1-4)</label><input type="number" id="ev-score" min="0" max="4" step="0.1" placeholder="3.0" required></div>
       </div>
       <div class="form-group"><label>Objetivos cumplidos (%)</label><input type="number" id="ev-goals" min="0" max="100" step="any" placeholder="85"></div>
       <div class="form-group"><label>Comentarios</label><textarea id="ev-comments" placeholder="Observaciones sobre el desempeño..."></textarea></div>
@@ -652,11 +653,20 @@
 
     <!-- DASHBOARD -->
     <div class="page active" id="page-dashboard">
-      <div class="grid4" style="margin-bottom:20px;">
+      <div class="grid5" style="margin-bottom:20px;">
         <div class="stat-card"><div class="stat-accent-bar" style="background:var(--accent)"></div><div class="stat-label">Total empleados</div><div class="stat-value" id="dash-total" style="color:var(--accent)">0</div><div class="stat-delta delta-up" id="dash-total-sub">—</div></div>
         <div class="stat-card"><div class="stat-accent-bar" style="background:var(--green)"></div><div class="stat-label">Activos hoy</div><div class="stat-value" id="dash-active" style="color:var(--green)">0</div><div class="stat-delta delta-up" id="dash-active-sub">—</div></div>
         <div class="stat-card"><div class="stat-accent-bar" style="background:var(--amber)"></div><div class="stat-label">Vacantes abiertas</div><div class="stat-value" id="dash-vacancies" style="color:var(--amber)">0</div><div class="stat-delta" style="color:var(--text3)" id="dash-vac-sub">—</div></div>
         <div class="stat-card"><div class="stat-accent-bar" style="background:var(--purple)"></div><div class="stat-label">Evaluaciones pendientes</div><div class="stat-value" id="dash-evals" style="color:var(--purple)">0</div><div class="stat-delta" style="color:var(--text3)">Q actual</div></div>
+        <div class="stat-card">
+          <div class="stat-accent-bar" style="background:var(--red)"></div>
+          <div class="stat-label" style="display:flex; justify-content:space-between; align-items:center;">
+            <span id="dash-rotation-label">Rotación</span>
+            <select id="dash-rotation-month" onchange="updateRotationStat(this.value)" style="background:transparent; border:none; color:var(--text3); font-size:9px; font-family:var(--mono); padding:0; width:auto; cursor:pointer; outline:none; text-transform:uppercase;"></select>
+          </div>
+          <div class="stat-value" id="dash-rotation" style="color:var(--red)">0%</div>
+          <div class="stat-delta" id="dash-rotation-sub" style="color:var(--text3)">0 bajas</div>
+        </div>
       </div>
       <div class="grid2" style="margin-bottom:20px;">
         <div class="card"><div class="card-title">Empleados recientes</div><div id="dash-recent-employees"><div class="empty-state"><p>Sin empleados aún</p></div></div></div>
@@ -693,7 +703,19 @@
       </div>
 
       <div class="grid4" style="margin-bottom:20px;">
-        <div class="stat-card"><div class="stat-accent-bar" style="background:var(--red)"></div><div class="stat-label">Índice Rotación Mensual</div><div class="stat-value" id="rot-month-pct" style="color:var(--red)">0%</div><div class="stat-delta" id="rot-month-sub">Este mes</div></div>
+        <div class="stat-card">
+          <div class="stat-accent-bar" style="background:var(--red)"></div>
+          <div class="stat-label" style="display:flex; justify-content:space-between; align-items:center;">
+            <span id="rot-page-label">Rotación en Periodo</span>
+            <div style="display:flex; gap:4px; align-items:center;">
+              <input type="date" id="rot-start-date" onchange="updateRotationStat(null, true)" style="background:var(--bg3); border:1px solid var(--border); color:var(--text2); font-size:9px; padding:2px; border-radius:4px; outline:none; font-family:var(--mono); width:90px;">
+              <span style="font-size:8px; color:var(--text3)">→</span>
+              <input type="date" id="rot-end-date" onchange="updateRotationStat(null, true)" style="background:var(--bg3); border:1px solid var(--border); color:var(--text2); font-size:9px; padding:2px; border-radius:4px; outline:none; font-family:var(--mono); width:90px;">
+            </div>
+          </div>
+          <div class="stat-value" id="rot-month-pct" style="color:var(--red)">0%</div>
+          <div class="stat-delta" id="rot-month-sub">Cargando...</div>
+        </div>
         <div class="stat-card"><div class="stat-accent-bar" style="background:var(--amber)"></div><div class="stat-label">Total Bajas Año</div><div class="stat-value" id="rot-year-total" style="color:var(--amber)">0</div><div class="stat-delta">Registros</div></div>
         <div class="stat-card"><div class="stat-accent-bar" style="background:var(--accent)"></div><div class="stat-label">Promedio Permanencia</div><div class="stat-value" id="rot-avg-tenure" style="color:var(--accent)">—</div><div class="stat-delta">Meses</div></div>
         <div class="stat-card"><div class="stat-accent-bar" style="background:var(--green)"></div><div class="stat-label">Tasa Retención</div><div class="stat-value" id="rot-retention" style="color:var(--green)">100%</div><div class="stat-delta">Anual</div></div>
@@ -1102,10 +1124,16 @@ window.renderPage=page=>{
 // ── DASHBOARD ─────────────────────────────────────────────────
 function renderDashboard(){
   const emps=DB.employees,total=emps.length,active=emps.filter(e=>e.status==='Activo').length,openVac=DB.vacancies.filter(v=>v.status!=='Cerrada').length;
+  
+  initRotationSelectors();
+
   document.getElementById('dash-total').textContent=total;document.getElementById('dash-total-sub').textContent=total+' registrados';
   document.getElementById('dash-active').textContent=active;document.getElementById('dash-active-sub').textContent=total?Math.round(active/total*100)+'% asistencia':'—';
   document.getElementById('dash-vacancies').textContent=openVac;document.getElementById('dash-vac-sub').textContent=DB.vacancies.filter(v=>v.status==='Urgente').length+' urgentes';
   document.getElementById('dash-evals').textContent=Math.max(0,total-DB.evals.length);
+
+  updateRotationStat(document.getElementById('dash-rotation-month').value);
+
   const recent=[...emps].sort((a,b)=>new Date(b.joinDate)-new Date(a.joinDate)).slice(0,4);
   const re=document.getElementById('dash-recent-employees');
   if(!recent.length){re.innerHTML='<div class="empty-state"><p>Sin empleados aún.</p></div>';}
@@ -1125,6 +1153,68 @@ function renderDashboard(){
   if(!alerts.length) alerts.push({msg:'Todo en orden',sub:'Sin alertas activas',color:'var(--green)'});
   document.getElementById('dash-alerts').innerHTML=alerts.map(a=>`<div style="display:flex;align-items:center;gap:10px;padding:10px;border-radius:8px;background:${a.color.replace(')',',0.07)')};border:1px solid ${a.color.replace(')',',0.25)')}"><div style="width:8px;height:8px;border-radius:50%;background:${a.color};flex-shrink:0;"></div><div><div style="font-size:12px;font-weight:500">${a.msg}</div><div style="font-size:11px;color:var(--text3)">${a.sub}</div></div></div>`).join('');
 }
+
+function initRotationSelectors() {
+  const dashSel = document.getElementById('dash-rotation-month');
+  const now = new Date();
+
+  if(dashSel && dashSel.options.length === 0) {
+    let opts = '';
+    for(let i=0; i<12; i++) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const val = d.toISOString().slice(0,7);
+      const lbl = d.toLocaleDateString('es-ES', { month: 'short', year: 'numeric' });
+      opts += `<option value="${val}">${lbl}</option>`;
+    }
+    dashSel.innerHTML = opts;
+    dashSel.value = now.toISOString().slice(0,7);
+  }
+
+  const sInput = document.getElementById('rot-start-date');
+  const eInput = document.getElementById('rot-end-date');
+  if(sInput && !sInput.value) {
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    sInput.value = startOfMonth.toISOString().split('T')[0];
+    eInput.value = now.toISOString().split('T')[0];
+  }
+}
+
+window.updateRotationStat = (month, isRotPage = false) => {
+  const emps = DB.employees, terms = DB.terminations;
+  let sStr, eStr;
+
+  if(isRotPage) {
+    sStr = document.getElementById('rot-start-date').value;
+    eStr = document.getElementById('rot-end-date').value;
+    if(!sStr || !eStr) return;
+  } else {
+    if(!month) return;
+    sStr = month + "-01";
+    const parts = month.split('-');
+    const lastDay = new Date(parseInt(parts[0]), parseInt(parts[1]), 0).getDate();
+    eStr = month + "-" + String(lastDay).padStart(2, '0');
+  }
+
+  const termsInPeriod = terms.filter(t => t.terminationDate && t.terminationDate >= sStr && t.terminationDate <= eStr).length;
+  const hiresAfter = emps.filter(e => e.joinDate && e.joinDate > eStr).length;
+  const termsAfter = terms.filter(t => t.terminationDate && t.terminationDate > eStr).length;
+  
+  const estimatedActiveAtEnd = emps.length + termsAfter - hiresAfter;
+  const totalExposure = estimatedActiveAtEnd + termsInPeriod;
+  const rotPct = totalExposure > 0 ? Math.round((termsInPeriod / totalExposure) * 100) : 0;
+
+  if(isRotPage) {
+    document.getElementById('rot-month-pct').textContent = rotPct + '%';
+    document.getElementById('rot-month-sub').textContent = termsInPeriod + (termsInPeriod === 1 ? ' baja registrada' : ' bajas registradas');
+    const sObj = new Date(sStr + "T12:00:00"), eObj = new Date(eStr + "T12:00:00");
+    document.getElementById('rot-page-label').textContent = `Rotación (${sObj.toLocaleDateString('es-ES',{day:'numeric',month:'short'})} - ${eObj.toLocaleDateString('es-ES',{day:'numeric',month:'short',year:'numeric'})})`;
+  } else {
+    document.getElementById('dash-rotation').textContent = rotPct + '%';
+    document.getElementById('dash-rotation-sub').textContent = termsInPeriod + (termsInPeriod === 1 ? ' baja' : ' bajas');
+    const sObj = new Date(sStr + "T12:00:00");
+    document.getElementById('dash-rotation-label').textContent = `Rotación Mensual (${sObj.toLocaleDateString('es-ES',{month:'long',year:'numeric'})})`;
+  }
+};
 
 // ── EMPLOYEES ────────────────────────────────────────────────
 function renderEmployees(){
@@ -1198,40 +1288,64 @@ window.deleteEmployee=()=>{
 window.openTerminateModal=()=>{
   const id = parseInt(document.getElementById('ee-id').value);
   const emp = DB.employees.find(x=>x.id===id);
-  if(!emp) return;
+  const isEdit = document.getElementById('term-id').value !== '';
+  if(!emp && !isEdit) return;
+
   document.getElementById('term-date').value = new Date().toISOString().split('T')[0];
+  if(!isEdit) {
+    document.querySelector('#modal-emp-terminate h3').textContent = 'Procesar baja de empleado';
+    document.querySelector('#modal-emp-terminate .btn-danger').textContent = 'Confirmar Baja';
+  }
   openModal('modal-emp-terminate');
 };
 
 window.executeTermination=()=>{
-  const id = parseInt(document.getElementById('ee-id').value);
-  const emp = DB.employees.find(x=>x.id===id);
+  const termIdInput = document.getElementById('term-id').value;
   const date = document.getElementById('term-date').value;
   const reason = document.getElementById('term-reason').value;
   
   if(!date) return toast('Selecciona la fecha','error');
   
-  const term = {
-    id: nextId(DB.terminations),
-    empId: emp.id,
-    empName: emp.name,
-    dept: emp.dept,
-    terminationDate: date,
-    joinDate: emp.joinDate,
-    reason: reason
-  };
+  if (termIdInput) {
+    // MODO EDICIÓN: Actualizar un registro histórico ya existente
+    const tId = parseInt(termIdInput);
+    const idx = DB.terminations.findIndex(t => t.id === tId);
+    if (idx !== -1) {
+      DB.terminations[idx].terminationDate = date;
+      DB.terminations[idx].reason = reason;
+      fbSave(COLS.terminations, DB.terminations[idx]);
+      addActivity(`Baja actualizada: ${DB.terminations[idx].empName}`, 'emp');
+      toast(`✓ Registro actualizado`, 'success');
+    }
+  } else {
+    // MODO NUEVO: Procesar salida de un empleado activo
+    const id = parseInt(document.getElementById('ee-id').value);
+    const emp = DB.employees.find(x=>x.id===id);
+    if(!emp) return toast('Error: No se encontró al empleado', 'error');
+
+    const term = {
+      id: nextId(DB.terminations),
+      empId: emp.id,
+      empName: emp.name,
+      dept: emp.dept,
+      terminationDate: date,
+      joinDate: emp.joinDate || '',
+      reason: reason
+    };
+    
+    DB.terminations.push(term);
+    fbSave(COLS.terminations, term);
+    
+    // Remover de empleados activos
+    DB.employees = DB.employees.filter(x=>x.id!==id);
+    fbDelete(COLS.employees, emp);
+    
+    addActivity(`Baja procesada: ${emp.name}`,'emp');
+    toast(`✓ Baja de ${emp.name} registrada`,'warn');
+  }
   
-  DB.terminations.push(term);
-  fbSave(COLS.terminations, term);
-  
-  // Remover de empleados activos
-  DB.employees = DB.employees.filter(x=>x.id!==id);
-  fbDelete(COLS.employees, emp);
-  
-  addActivity(`Baja procesada: ${emp.name}`,'emp');
   closeAllModals();
   renderPage(window.currentPage);
-  toast(`✓ Baja de ${emp.name} registrada`,'warn');
 };
 
 // ── ROTACIÓN ──────────────────────────────────────────────────
@@ -1244,14 +1358,10 @@ const DEPT_UNIFIER = {
 const getGroupedDept = (d) => DEPT_UNIFIER[d] || d;
 
 function renderRotacion(){
-  const now = new Date();
-  const curMonth = now.toISOString().slice(0,7); // YYYY-MM
-  const termsMonth = DB.terminations.filter(t => t.terminationDate.startsWith(curMonth)).length;
-  const totalEmp = DB.employees.length || 1;
+  initRotationSelectors();
+  updateRotationStat(null, true); // Call with null for month and true for isRotPage to use date pickers
   
-  const monthRate = Math.round((termsMonth / totalEmp) * 100);
-  document.getElementById('rot-month-pct').textContent = monthRate + '%';
-  document.getElementById('rot-month-sub').textContent = termsMonth + ' bajas este mes';
+  const now = new Date();
   document.getElementById('rot-year-total').textContent = DB.terminations.length;
   
   // Promedio Permanencia
@@ -1500,8 +1610,8 @@ function renderKPIs(){
     document.getElementById('kpi-masa').textContent=fmtCurrency(totalSalary);
     document.getElementById('kpi-masa-sub').textContent=total?`Prom. ${fmtCurrency(Math.round(totalSalary/total))}/emp.`:'Sin datos';
   }
-  document.getElementById('kpi-score').textContent=avgScore!==null?avgScore+'/10':'—';document.getElementById('kpi-score-sub').textContent=DB.evals.length?`${DB.evals.length} evaluaciones`:'Sin evaluaciones aún';
-  const empty=(id,msg)=>{document.getElementById(id).innerHTML=`<div class="empty-state" style="padding:24px"><p>${msg}</p></div>`;};
+  document.getElementById('kpi-score').textContent=avgScore!==null?avgScore+'/4':'—';document.getElementById('kpi-score-sub').textContent=DB.evals.length?`${DB.evals.length} evaluaciones`:'Sin evaluaciones aún';
+  const empty=(id,msg)=>{document.getElementById(id).innerHTML=`<div class="empty-state" style="padding:24px"><p>${msg}</p></div>`;}; 
   const depts=getDepts();
   if(!depts.length||!total){empty('kpi-dept-bars','Agrega empleados y departamentos para ver la distribución');}
   else{const maxC=Math.max(1,...depts.map(d=>emps.filter(e=>e.dept===d).length));document.getElementById('kpi-dept-bars').innerHTML=depts.map((d,i)=>{const c=emps.filter(e=>e.dept===d).length;const pct=c?Math.round(c/maxC*100):0;const col=PALETA[i%PALETA.length];return `<div class="bar-row"><div class="bar-label" title="${d}">${d}</div><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${col}"></div></div><div class="bar-val">${c}</div></div>`;}).join('');}
@@ -1525,25 +1635,25 @@ function renderKPIs(){
   if(kpiTopSalariesCard) kpiTopSalariesCard.style.display=window.privacyMode?'none':'';
   if(!window.privacyMode){const top5=[...emps].sort((a,b)=>b.salary-a.salary).slice(0,5);if(!top5.length){empty('kpi-top-salaries','Sin empleados registrados');}else{document.getElementById('kpi-top-salaries').innerHTML=top5.map((e,i)=>`<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);"><div style="font-size:13px;color:var(--text3);font-family:var(--mono);width:18px;">${i+1}</div><div class="emp-avatar" style="background:${getColor(e.name)};font-size:10px;width:28px;height:28px;">${initials(e.name)}</div><div style="flex:1;"><div style="font-size:13px;font-weight:500;">${e.name}</div><div style="font-size:11px;color:var(--text3);">${e.dept} · ${e.role}</div></div><div style="font-family:var(--mono);font-size:13px;font-weight:600;color:var(--green);">${fmtCurrency(e.salary)}</div></div>`).join('');}}
   if(!DB.evals.length){empty('kpi-evals-summary','Sin evaluaciones registradas aún');}
-  else{const avgG=DB.evals.length?Math.round(DB.evals.reduce((s,e)=>s+(e.goals||0),0)/DB.evals.length):0;const topEvals=[...DB.evals].sort((a,b)=>b.score-a.score).slice(0,4);document.getElementById('kpi-evals-summary').innerHTML=`<div style="display:flex;gap:16px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border);"><div style="text-align:center;flex:1;"><div style="font-size:22px;font-weight:600;color:var(--accent);">${avgScore}/10</div><div style="font-size:11px;color:var(--text3);">Score promedio</div></div><div style="text-align:center;flex:1;"><div style="font-size:22px;font-weight:600;color:var(--green);">${avgG}%</div><div style="font-size:11px;color:var(--text3);">Objetivos prom.</div></div><div style="text-align:center;flex:1;"><div style="font-size:22px;font-weight:600;color:var(--purple);">${DB.evals.length}</div><div style="font-size:11px;color:var(--text3);">Evaluaciones</div></div></div>`+topEvals.map(ev=>{const color=ev.score>=8?'var(--green)':ev.score>=6?'var(--amber)':'var(--red)';return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;"><div class="emp-avatar" style="background:${getColor(ev.empName)};font-size:10px;width:26px;height:26px;">${initials(ev.empName)}</div><div style="flex:1;font-size:12px;"><div style="font-weight:500;">${ev.empName}</div><div style="color:var(--text3);">${ev.period||'—'}</div></div><div style="font-family:var(--mono);font-size:14px;font-weight:600;color:${color};">${ev.score}/10</div></div>`;}).join('');}
+  else{const avgG=DB.evals.length?Math.round(DB.evals.reduce((s,e)=>s+(e.goals||0),0)/DB.evals.length):0;const topEvals=[...DB.evals].sort((a,b)=>b.score-a.score).slice(0,4);document.getElementById('kpi-evals-summary').innerHTML=`<div style="display:flex;gap:16px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border);"><div style="text-align:center;flex:1;"><div style="font-size:22px;font-weight:600;color:var(--accent);">${avgScore}/4</div><div style="font-size:11px;color:var(--text3);">Score promedio</div></div><div style="text-align:center;flex:1;"><div style="font-size:22px;font-weight:600;color:var(--green);">${avgG}%</div><div style="font-size:11px;color:var(--text3);">Objetivos prom.</div></div><div style="text-align:center;flex:1;"><div style="font-size:22px;font-weight:600;color:var(--purple);">${DB.evals.length}</div><div style="font-size:11px;color:var(--text3);">Evaluaciones</div></div></div>`+topEvals.map(ev=>{const color=ev.score>=3.5?'var(--green)':ev.score>=2.5?'var(--amber)':'var(--red)';return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;"><div class="emp-avatar" style="background:${getColor(ev.empName)};font-size:10px;width:26px;height:26px;">${initials(ev.empName)}</div><div style="flex:1;font-size:12px;"><div style="font-weight:500;">${ev.empName}</div><div style="color:var(--text3);">${ev.period||'—'}</div></div><div style="font-family:var(--mono);font-size:14px;font-weight:600;color:${color};">${ev.score}/4</div></div>`;}).join('');}
 }
 
 window.exportKPI=()=>{
   const emps=DB.employees;
   const masaSal=window.privacyMode?'[CONFIDENCIAL]':fmtCurrency(emps.reduce((s,e)=>s+(e.salary||0),0));
   const promSal=window.privacyMode?'[CONFIDENCIAL]':fmtCurrency(emps.length?Math.round(emps.reduce((s,e)=>s+(e.salary||0),0)/emps.length):0);
-  const lines=['═══ INFORME KPIs RRHH ═══','Fecha: '+new Date().toLocaleDateString('es-GT'),'','── PERSONAL ──','Total empleados: '+emps.length,'Activos: '+emps.filter(e=>e.status==='Activo').length,'En prueba: '+emps.filter(e=>e.status==='En prueba').length,'En vacaciones: '+emps.filter(e=>e.status==='Vacaciones').length,'Baja médica: '+emps.filter(e=>e.status==='Baja médica').length,'','── NÓMINA ──','Masa salarial total: '+masaSal,'Salario promedio: '+promSal,'','── POR DEPARTAMENTO ──',...getDepts().map(d=>`${d}: ${emps.filter(e=>e.dept===d).length} empleados`),'','── RECLUTAMIENTO ──','Vacantes abiertas: '+DB.vacancies.filter(v=>v.status!=='Cerrada').length,'Candidatos activos: '+DB.candidates.length,'','── VACACIONES ──','Pendientes: '+DB.vacations.filter(v=>v.status==='Pendiente').length,'Aprobadas: '+DB.vacations.filter(v=>v.status==='Aprobada').length,'Rechazadas: '+DB.vacations.filter(v=>v.status==='Rechazada').length,'','── EVALUACIONES ──','Total evaluaciones: '+DB.evals.length,'Score promedio: '+(DB.evals.length?Math.round(DB.evals.reduce((s,e)=>s+e.score,0)/DB.evals.length*10)/10+'/10':'—')];
+  const lines=['═══ INFORME KPIs RRHH ═══','Fecha: '+new Date().toLocaleDateString('es-GT'),'','── PERSONAL ──','Total empleados: '+emps.length,'Activos: '+emps.filter(e=>e.status==='Activo').length,'En prueba: '+emps.filter(e=>e.status==='En prueba').length,'En vacaciones: '+emps.filter(e=>e.status==='Vacaciones').length,'Baja médica: '+emps.filter(e=>e.status==='Baja médica').length,'','── NÓMINA ──','Masa salarial total: '+masaSal,'Salario promedio: '+promSal,'','── POR DEPARTAMENTO ──',...getDepts().map(d=>`${d}: ${emps.filter(e=>e.dept===d).length} empleados`),'','── RECLUTAMIENTO ──','Vacantes abiertas: '+DB.vacancies.filter(v=>v.status!=='Cerrada').length,'Candidatos activos: '+DB.candidates.length,'','── VACACIONES ──','Pendientes: '+DB.vacations.filter(v=>v.status==='Pendiente').length,'Aprobadas: '+DB.vacations.filter(v=>v.status==='Aprobada').length,'Rechazadas: '+DB.vacations.filter(v=>v.status==='Rechazada').length,'','── EVALUACIONES ──','Total evaluaciones: '+DB.evals.length,'Score promedio: '+(DB.evals.length?Math.round(DB.evals.reduce((s,e)=>s+e.score,0)/DB.evals.length*10)/10+'/4':'—')];
   downloadFile(lines.join('\n'),'kpis_'+new Date().toISOString().split('T')[0]+'.txt','text/plain');toast('✓ Informe KPI exportado','success');
-};
+}; 
 
 // ── EVALUATIONS ───────────────────────────────────────────────
 function renderEvals(){
-  const evs=DB.evals;document.getElementById('ev-total').textContent=evs.length;const avg=evs.length?Math.round(evs.reduce((s,e)=>s+e.score,0)/evs.length*10)/10:0;document.getElementById('ev-avg').textContent=evs.length?avg+'/10':'—';document.getElementById('ev-goals').textContent=evs.length?Math.round(evs.reduce((s,e)=>s+(e.goals||0),0)/evs.length)+'%':'—';document.getElementById('ev-emp-count').textContent=new Set(evs.map(e=>e.empId)).size;
-  const tbody=document.getElementById('evals-tbody');
+  const evs=DB.evals;document.getElementById('ev-total').textContent=evs.length;const avg=evs.length?Math.round(evs.reduce((s,e)=>s+e.score,0)/evs.length*10)/10:0;document.getElementById('ev-avg').textContent=evs.length?avg+'/4':'—';document.getElementById('ev-goals').textContent=evs.length?Math.round(evs.reduce((s,e)=>s+(e.goals||0),0)/evs.length)+'%':'—';document.getElementById('ev-emp-count').textContent=new Set(evs.map(e=>e.empId)).size;
+  const tbody=document.getElementById('evals-tbody'); 
   if(!evs.length){tbody.innerHTML='<tr><td colspan="7"><div class="empty-state" style="padding:30px"><p>Sin evaluaciones.</p></div></td></tr>';return;}
-  tbody.innerHTML=evs.map(ev=>{const score=ev.score||0,color=score>=8?'var(--green)':score>=6?'var(--amber)':'var(--red)';return `<tr><td><div class="emp-row"><div class="emp-avatar" style="background:${getColor(ev.empName)};font-size:10px;width:28px;height:28px;">${initials(ev.empName)}</div><div class="emp-name">${ev.empName}</div></div></td><td style="color:var(--text2);font-size:12px">${ev.empDept||'—'}</td><td style="font-family:var(--mono);font-size:12px">${ev.period||'—'}</td><td><span style="font-size:16px;font-weight:600;color:${color};font-family:var(--mono)">${score}</span><span style="font-size:11px;color:var(--text3)">/10</span></td><td><div style="display:flex;align-items:center;gap:8px;"><div class="progress" style="width:70px"><div class="progress-fill" style="width:${ev.goals||0}%;background:var(--accent)"></div></div><span style="font-size:11px;font-family:var(--mono)">${ev.goals||0}%</span></div></td><td style="font-size:12px;color:var(--text2);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${ev.comments||'—'}</td><td><button class="btn btn-ghost" onclick="deleteEval(${ev.id})" style="padding:3px 8px;font-size:11px;color:var(--red)">✕</button></td></tr>`;}).join('');
+  tbody.innerHTML=evs.map(ev=>{const score=ev.score||0,color=score>=3.5?'var(--green)':score>=2.5?'var(--amber)':'var(--red)';return `<tr><td><div class="emp-row"><div class="emp-avatar" style="background:${getColor(ev.empName)};font-size:10px;width:28px;height:28px;">${initials(ev.empName)}</div><div class="emp-name">${ev.empName}</div></div></td><td style="color:var(--text2);font-size:12px">${ev.empDept||'—'}</td><td style="font-family:var(--mono);font-size:12px">${ev.period||'—'}</td><td><span style="font-size:16px;font-weight:600;color:${color};font-family:var(--mono)">${score}</span><span style="font-size:11px;color:var(--text3)">/4</span></td><td><div style="display:flex;align-items:center;gap:8px;"><div class="progress" style="width:70px"><div class="progress-fill" style="width:${ev.goals||0}%;background:var(--accent)"></div></div><span style="font-size:11px;font-family:var(--mono)">${ev.goals||0}%</span></div></td><td style="font-size:12px;color:var(--text2);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${ev.comments||'—'}</td><td><button class="btn btn-ghost" onclick="deleteEval(${ev.id})" style="padding:3px 8px;font-size:11px;color:var(--red)">✕</button></td></tr>`;}).join('');
 }
-window.submitEval=e=>{e.preventDefault();const empId=parseInt(document.getElementById('ev-emp').value);const emp=DB.employees.find(x=>x.id===empId);if(!emp) return toast('Selecciona un empleado','error');const ev={id:nextId(DB.evals),empId,empName:emp.name,empDept:emp.dept,period:document.getElementById('ev-period').value.trim(),score:parseFloat(document.getElementById('ev-score').value)||0,goals:parseFloat(document.getElementById('ev-goals').value)||0,comments:document.getElementById('ev-comments').value.trim()};DB.evals.push(ev);fbSave(COLS.evals,ev);addActivity(`Evaluación de ${emp.name}: ${ev.score}/10`,'eval');closeAllModals();document.getElementById('form-eval').reset();renderEvals();toast('✓ Evaluación guardada','success');};
+window.submitEval=e=>{e.preventDefault();const empId=parseInt(document.getElementById('ev-emp').value);const emp=DB.employees.find(x=>x.id===empId);if(!emp) return toast('Selecciona un empleado','error');const ev={id:nextId(DB.evals),empId,empName:emp.name,empDept:emp.dept,period:document.getElementById('ev-period').value.trim(),score:parseFloat(document.getElementById('ev-score').value)||0,goals:parseFloat(document.getElementById('ev-goals').value)||0,comments:document.getElementById('ev-comments').value.trim()};DB.evals.push(ev);fbSave(COLS.evals,ev);addActivity(`Evaluación de ${emp.name}: ${ev.score}/4`,'eval');closeAllModals();document.getElementById('form-eval').reset();renderEvals();toast('✓ Evaluación guardada','success');};
 window.deleteEval=id=>{if(!confirm('¿Eliminar?')) return;const ev=DB.evals.find(x=>x.id===id);if(!ev) return;DB.evals=DB.evals.filter(x=>x.id!==id);fbDelete(COLS.evals,ev);renderEvals();toast('Evaluación eliminada','info');};
 
 // ── COMMS ─────────────────────────────────────────────────────
